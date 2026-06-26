@@ -4,6 +4,7 @@ import { createSelection, getSelectedBlockIds } from "../selectionHelpers.js";
 import { focusEditable, readEditedText } from "../textEditing.js";
 import { createDragGhost, dropDragGhost, moveDragGhost } from "./dragGhost.js";
 import { getDraggedFrame, getPointerOffsetInBlockMm, getPointerOffsetInElementPx } from "./frameMath.js";
+import { createGroupDragPreview } from "./groupDragPreview.js";
 import { CLICK_MOVE_THRESHOLD_PX, HOLD_TO_PICKUP_MS } from "./interactionConstants.js";
 import { getPageElementUnderPointer, getPageIdFromElement } from "./pageHitTesting.js";
 
@@ -29,6 +30,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
   let latestFrame = { ...block.frame };
   let latestPageId = page.id;
   let ghost = null;
+  let groupPreview = null;
 
   function beginPickup(pickupEvent, targetPageId = page.id) {
     if (pickedUp || released) return;
@@ -44,6 +46,11 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
 
     blockElement.classList.add("is-drag-source");
     ghost = createDragGhost(blockElement, pickupEvent, pointerOffsetPx);
+    groupPreview = createGroupDragPreview({
+      pageElement,
+      blockIds: activeSelectionIds,
+      sourceBlockId: block.id,
+    });
   }
 
   const holdTimer = window.setTimeout(() => {
@@ -77,6 +84,10 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
 
     beginPickup(moveEvent, targetPageId);
     moveDragGhost(ghost, moveEvent, pointerOffsetPx);
+    groupPreview?.move({
+      x: latestFrame.x - block.frame.x,
+      y: latestFrame.y - block.frame.y,
+    });
   };
 
   const up = (upEvent) => {
@@ -89,6 +100,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
     blockElement.classList.remove("is-drag-source");
 
     if (wasSelected && activeSelectionIds.length === 1 && !moved && !pickedUp && canEditBlockText(block)) {
+      groupPreview?.clear();
       controller.startTextEdit(block.id);
       focusEditable(block.id);
       return;
@@ -98,6 +110,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
       if (moved) {
         const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
         const dropPageId = getPageIdFromElement(dropPageElement) ?? latestPageId;
+        groupPreview?.clear();
         controller.commitBlockMove(block.id, dropPageId, latestFrame, { shouldRender: false });
         controller.selectBlocks(activeSelectionIds, dropPageId, { shouldRender: false });
         dropDragGhost(ghost);
@@ -105,11 +118,13 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
         return;
       }
 
+      groupPreview?.clear();
       dropDragGhost(ghost);
       controller.selectBlocks(activeSelectionIds, page.id);
       return;
     }
 
+    groupPreview?.clear();
     controller.selectBlocks(activeSelectionIds, page.id);
   };
 
