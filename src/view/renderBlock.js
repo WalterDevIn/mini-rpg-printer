@@ -5,12 +5,23 @@ import { readEditedText } from "../editor/textEditing.js";
 import { el } from "../shared/dom.js";
 import { frameToCss } from "../shared/geometry.js";
 
+function getBlockClassName({ block, editorState, isSelected, isEditing }) {
+  return [
+    "block",
+    `block--${block.type}`,
+    isSelected ? "is-selected" : "",
+    isEditing ? "is-editing" : "",
+    editorState.interaction.draggingBlockId === block.id ? "is-dragging" : "",
+    editorState.interaction.droppingBlockId === block.id ? "is-dropping" : "",
+  ].filter(Boolean).join(" ");
+}
+
 function renderTextBlock({ block, page, pageElement, editorState, controller }) {
   const isSelected = editorState.selection.blockId === block.id;
   const isEditing = isEditingBlock(editorState, block.id);
 
   const blockElement = el("article", {
-    className: `block block--text${isSelected ? " is-selected" : ""}${isEditing ? " is-editing" : ""}`,
+    className: getBlockClassName({ block, editorState, isSelected, isEditing }),
     style: {
       ...frameToCss(block.frame),
       fontFamily: block.props.fontFamily,
