@@ -1,5 +1,6 @@
 import { canEditBlockText } from "../../blocks/blockCapabilities.js";
 import { safeReleasePointerCapture } from "../../shared/geometry.js";
+import { createSelection, getSelectedBlockIds } from "../selectionHelpers.js";
 import { focusEditable, readEditedText } from "../textEditing.js";
 import { createDragGhost, dropDragGhost, moveDragGhost } from "./dragGhost.js";
 import { getDraggedFrame, getPointerOffsetInBlockMm, getPointerOffsetInElementPx } from "./frameMath.js";
@@ -7,11 +8,16 @@ import { CLICK_MOVE_THRESHOLD_PX, HOLD_TO_PICKUP_MS } from "./interactionConstan
 import { getPageElementUnderPointer, getPageIdFromElement } from "./pageHitTesting.js";
 
 export function startBlockDragSession({ event, block, page, pageElement, editorState, controller }) {
+  if (event.button !== 0) return;
+
   event.stopPropagation();
   event.preventDefault();
 
   const blockElement = event.currentTarget;
-  const wasSelected = editorState.selection.blockId === block.id;
+  const selectedIdsAtStart = getSelectedBlockIds(editorState);
+  const isPartOfSelection = selectedIdsAtStart.includes(block.id);
+  const activeSelectionIds = isPartOfSelection ? selectedIdsAtStart : [block.id];
+  const wasSelected = isPartOfSelection;
   const pointerOffsetMm = getPointerOffsetInBlockMm(event, block, pageElement);
   const pointerOffsetPx = getPointerOffsetInElementPx(event, blockElement);
   const startClient = { x: event.clientX, y: event.clientY };
@@ -29,7 +35,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
 
     pickedUp = true;
     latestPageId = targetPageId;
-    editorState.selection = { blockId: block.id, pageId: targetPageId };
+    editorState.selection = createSelection(activeSelectionIds, targetPageId);
     editorState.interaction.mode = "dragging-block";
     editorState.interaction.pickingBlockId = block.id;
     editorState.interaction.draggingBlockId = block.id;
@@ -45,7 +51,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
   }, HOLD_TO_PICKUP_MS);
 
   controller.commitTextEdit(readEditedText, { shouldRender: false });
-  editorState.selection = { blockId: block.id, pageId: page.id };
+  editorState.selection = createSelection(activeSelectionIds, page.id);
   editorState.interaction.contextMenu = null;
 
   pageElement.setPointerCapture?.(event.pointerId);
@@ -82,7 +88,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
 
     blockElement.classList.remove("is-drag-source");
 
-    if (wasSelected && !moved && !pickedUp && canEditBlockText(block)) {
+    if (wasSelected && activeSelectionIds.length === 1 && !moved && !pickedUp && canEditBlockText(block)) {
       controller.startTextEdit(block.id);
       focusEditable(block.id);
       return;
@@ -93,18 +99,18 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
         const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
         const dropPageId = getPageIdFromElement(dropPageElement) ?? latestPageId;
         controller.commitBlockMove(block.id, dropPageId, latestFrame, { shouldRender: false });
-        controller.selectBlock(block.id, dropPageId, { shouldRender: false });
+        controller.selectBlocks(activeSelectionIds, dropPageId, { shouldRender: false });
         dropDragGhost(ghost);
         controller.endBlockDrop(block.id);
         return;
       }
 
       dropDragGhost(ghost);
-      controller.selectBlock(block.id, page.id);
+      controller.selectBlocks(activeSelectionIds, page.id);
       return;
     }
 
-    controller.selectBlock(block.id, page.id);
+    controller.selectBlocks(activeSelectionIds, page.id);
   };
 
   window.addEventListener("pointermove", move);
