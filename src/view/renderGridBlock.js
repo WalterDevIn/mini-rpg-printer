@@ -38,7 +38,10 @@ export function renderGridBlock({ block, page, pageElement, editorState, control
     pageElement,
     editorState,
     controller,
-    commonStyle,
+    commonStyle: {
+      ...commonStyle,
+      borderColor: gridStyle.color,
+    },
     children: [content],
   });
 }
