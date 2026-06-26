@@ -26,10 +26,7 @@ export function el(tagName, options = {}, children = []) {
     element.addEventListener(eventName, handler);
   });
 
-  children.forEach((child) => {
-    if (child === null || child === undefined) return;
-    element.append(child);
-  });
+  appendChildren(element, children);
 
   return element;
 }
@@ -50,4 +47,11 @@ export function iconButton({ iconClass, label, disabled = false, active = false,
     },
     [icon(iconClass), el("span", { className: "sr-only", textContent: label })],
   );
+}
+
+function appendChildren(element, children) {
+  children.flat(Infinity).forEach((child) => {
+    if (child === null || child === undefined) return;
+    element.append(child);
+  });
 }
