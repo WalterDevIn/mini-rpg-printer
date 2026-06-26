@@ -1,12 +1,16 @@
-import { createPrintDocument } from "../document/documentFactory.js";
+import { hydratePrintDocument } from "../document/documentHydration.js";
+import { loadStoredDocument } from "../document/documentStorage.js";
 import { loadEditorSettings } from "../settings/editorSettingsStorage.js";
 
 export function createEditorState() {
   const settings = loadEditorSettings();
 
   return {
-    document: createPrintDocument({ pageSpec: settings.pageSpec }),
+    document: hydratePrintDocument(loadStoredDocument(), { pageSpec: settings.pageSpec }),
     settings,
+    clipboard: {
+      block: null,
+    },
     viewport: {
       zoom: 1,
       showGrid: true,
