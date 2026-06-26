@@ -1,7 +1,8 @@
-import { createBlock, createSpread } from "./documentFactory.js";
-import { findBlockById, findPageById, getFirstPage } from "./documentQueries.js";
+import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { constrainFrameToPage } from "../shared/geometry.js";
 import { mergePlainObjects } from "../shared/objectMerge.js";
+import { createBlock, createSpread } from "./documentFactory.js";
+import { findBlockById, findPageById, getFirstPage } from "./documentQueries.js";
 
 export function addSpread(documentModel) {
   const spread = createSpread();
@@ -51,7 +52,7 @@ export function updateBlockFrame(documentModel, blockId, nextFrame) {
   found.block.frame = constrainFrameToPage({
     ...found.block.frame,
     ...nextFrame,
-  }, documentModel.pageSpec);
+  }, documentModel.pageSpec, getMinimumFrameSize(found.block));
 
   return found.block;
 }
@@ -63,4 +64,12 @@ export function updateBlockProps(documentModel, blockId, nextProps) {
   found.block.props = mergePlainObjects(found.block.props, nextProps);
 
   return found.block;
+}
+
+function getMinimumFrameSize(block) {
+  if (block.type === BLOCK_TYPES.line) {
+    return { widthMm: 5, heightMm: 0.5 };
+  }
+
+  return {};
 }
