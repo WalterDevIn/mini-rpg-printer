@@ -35,6 +35,11 @@ function updateTextStyle(controller, block, patch) {
   controller.updateBlockProps(block.id, { textStyle: patch });
 }
 
+function getBlockDisplayName(block) {
+  if (block.type === BLOCK_TYPES.text) return "Texto";
+  return block.type;
+}
+
 function renderCommonProperties({ block, controller }) {
   const style = getCommonStyle(block);
 
@@ -120,9 +125,12 @@ function renderTextProperties({ block, controller }) {
       ],
       onChange: (value) => updateTextStyle(controller, block, { verticalAlign: value }),
     })),
-    field("Padding", checkboxControl({
-      checked: textStyle.hasPadding,
-      onChange: (value) => updateTextStyle(controller, block, { hasPadding: value }),
+    field("Relleno", numberControl({
+      value: textStyle.paddingMm,
+      min: 0,
+      max: 20,
+      step: 0.5,
+      onChange: (value) => updateTextStyle(controller, block, { paddingMm: value }),
     })),
   ]);
 }
@@ -145,7 +153,7 @@ export function renderContextMenu({ editorState, controller }) {
       contextmenu: (event) => event.preventDefault(),
     },
   }, [
-    el("div", { className: "context-menu__title", textContent: "Editar" }),
+    el("div", { className: "context-menu__title", textContent: `Editar ${getBlockDisplayName(found.block)}` }),
     renderCommonProperties({ block: found.block, controller }),
     renderTextProperties({ block: found.block, controller }),
   ]);
