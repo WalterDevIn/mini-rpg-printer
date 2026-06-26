@@ -1,6 +1,6 @@
 # Mini RPG Printer
 
-Editor visual estilo OneNote/Figma para preparar hojas de bolsillo imprimibles.
+Editor visual para crear documentos imprimibles en PDF. La app está pensada como una versión pequeña de un editor tipo Figma/OneNote: canvas desplazable, páginas físicas en milímetros, bloques editables y comandos de edición.
 
 ## Ejecutar
 
@@ -8,6 +8,10 @@ Editor visual estilo OneNote/Figma para preparar hojas de bolsillo imprimibles.
 npm install
 npm run dev
 ```
+
+## Propósito
+
+La aplicación edita documentos diseñados para impresión. El documento interno usa unidades físicas (`mm`) para que el layout que se ve en pantalla pueda exportarse después a PDF o imprimirse sin sorpresas de escala.
 
 ## Estado actual
 
@@ -22,35 +26,67 @@ npm run dev
 - Segundo click sobre un bloque ya seleccionado para editar texto.
 - `Enter` confirma la edición.
 - Click fuera u otro bloque cierra la edición actual.
-- Click derecho sobre un bloque abre el menú de fuente.
+- Click derecho sobre un bloque abre el menú de propiedades.
 - `Delete`, `Supr`, `Backspace` o botón de papelera eliminan el bloque seleccionado.
 
-## Controles
+## Arquitectura
 
-- Icono `A`: crea un bloque de texto en la primera hoja.
-- Icono de hojas: agrega dos hojas nuevas debajo.
-- Icono de papelera: borra el bloque seleccionado.
-- Icono de grilla: activa o desactiva la grilla.
-- Click sobre bloque: seleccionar.
-- Segundo click sobre el mismo bloque: editar texto.
-- Arrastrar bloque: moverlo por la hoja.
-- Tirador inferior derecho: redimensionar.
-- `Enter`: terminar edición.
-- `Escape`: salir de edición o cerrar menú contextual.
-- Click derecho sobre bloque: cambiar fuente.
+```text
+src/
+  main.js                       # Entry point mínimo
+  app/
+    createEditorApp.js           # Composition root de la aplicación
+  document/
+    printSpec.js                 # Tamaño físico, grilla e intención de impresión
+    documentFactory.js            # Crea documentos, páginas, spreads y bloques
+    documentQueries.js            # Búsqueda dentro del documento
+    documentCommands.js           # Mutaciones del documento imprimible
+  blocks/
+    blockTypes.js                # Tipos de bloque soportados
+    blockRegistry.js             # Registro extensible de bloques
+    textBlockDefinition.js        # Definición del bloque de texto
+  editor/
+    editorState.js               # Estado de editor: documento, viewport, selección, interacción
+    editorController.js           # Acciones de aplicación; traduce UI a comandos
+    editorSelectors.js            # Selectores derivados del estado
+    blockInteraction.js           # Drag, resize, edición por click
+    installEditorEvents.js        # Atajos y eventos globales
+    textEditing.js                # Helpers DOM de edición textual
+  view/
+    renderEditor.js              # Vista raíz
+    renderToolbar.js             # Toolbar
+    renderCanvas.js              # Canvas, spreads y páginas
+    renderBlock.js               # Render de bloques tipados
+    renderContextMenu.js          # Menú contextual de propiedades
+  shared/
+    createId.js                  # IDs
+    dom.js                       # Helpers DOM
+    geometry.js                  # Conversión px/mm, snap y constraints
+```
 
-## Estructura
+## Criterio de capas
 
-- `src/main.js`: entry point mínimo.
-- `src/app/boot.js`: arranque.
-- `src/app/render.js`: render global y eventos globales.
-- `src/core/`: constantes, geometría, estado y modelo del documento.
-- `src/ui/`: componentes de toolbar, hojas, bloques, menú contextual y helpers DOM.
+`document/` no sabe nada del DOM. Define el documento imprimible y sus comandos.
+
+`blocks/` define tipos de bloque. Para agregar un bloque nuevo, se agrega su definición y luego su render.
+
+`editor/` maneja selección, herramienta activa, edición, drag, resize y comandos de usuario.
+
+`view/` sólo renderiza y captura eventos.
+
+`shared/` contiene utilidades sin dependencia del dominio.
+
+## Agregar un nuevo tipo de bloque
+
+1. Crear una definición en `src/blocks/` con `type`, `label`, `iconClass`, `defaultFrame` y `defaultProps`.
+2. Registrar el tipo en `blockRegistry.js`.
+3. Agregar su render en `renderBlock.js`.
+4. Agregar un botón o herramienta en `renderToolbar.js`.
 
 ## Próximos pasos razonables
 
-1. Permitir elegir en qué hoja se crea el nuevo bloque.
-2. Persistir el documento en `localStorage`.
-3. Agregar exportación/impresión A4.
-4. Agregar más elementos: línea, caja, imagen, tabla pequeña, checkbox, título.
+1. Persistir el documento en `localStorage`.
+2. Agregar exportación/impresión A4 o PDF.
+3. Separar herramientas: selección, texto, imagen, caja, línea.
+4. Agregar inspector lateral de propiedades.
 5. Agregar zoom sin perder la escala física en milímetros.
