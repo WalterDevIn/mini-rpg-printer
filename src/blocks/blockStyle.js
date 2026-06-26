@@ -16,6 +16,24 @@ export const DEFAULT_TEXT_STYLE = {
   paddingMm: 1,
 };
 
+export const DEFAULT_LINE_STYLE = {
+  angleDeg: 0,
+  thicknessMm: 0.5,
+};
+
+export const DEFAULT_RULED_TEXT_STYLE = {
+  horizontalAlign: "left",
+  lineVerticalAlign: "middle",
+  paddingMm: 1,
+  lineHeightMm: 5,
+};
+
+export const DEFAULT_INTERNAL_GRID_STYLE = {
+  color: "#94a3b8",
+  opacity: 0.45,
+  sizeMm: 5,
+};
+
 export function getCommonStyle(block) {
   return {
     ...DEFAULT_COMMON_STYLE,
@@ -37,7 +55,42 @@ export function getTextStyle(block) {
     ...nextStyle,
     horizontalAlign: normalizeHorizontalAlign(nextStyle.horizontalAlign),
     verticalAlign: normalizeVerticalAlign(nextStyle.verticalAlign),
-    paddingMm: normalizePaddingMm(nextStyle),
+    paddingMm: normalizePaddingMm(nextStyle, DEFAULT_TEXT_STYLE.paddingMm),
+  };
+}
+
+export function getLineStyle(block) {
+  return {
+    ...DEFAULT_LINE_STYLE,
+    ...block.props.line,
+  };
+}
+
+export function getRuledTextStyle(block) {
+  const nextStyle = {
+    ...DEFAULT_RULED_TEXT_STYLE,
+    ...block.props.ruledText,
+  };
+
+  return {
+    ...nextStyle,
+    horizontalAlign: normalizeHorizontalAlign(nextStyle.horizontalAlign),
+    lineVerticalAlign: normalizeVerticalAlign(nextStyle.lineVerticalAlign),
+    paddingMm: normalizePaddingMm(nextStyle, DEFAULT_RULED_TEXT_STYLE.paddingMm),
+    lineHeightMm: 5,
+  };
+}
+
+export function getInternalGridStyle(block) {
+  const nextStyle = {
+    ...DEFAULT_INTERNAL_GRID_STYLE,
+    ...block.props.internalGrid,
+  };
+
+  return {
+    ...nextStyle,
+    opacity: clampNumber(nextStyle.opacity, 0, 1),
+    sizeMm: 5,
   };
 }
 
@@ -54,8 +107,13 @@ function normalizeVerticalAlign(value) {
   return DEFAULT_TEXT_STYLE.verticalAlign;
 }
 
-function normalizePaddingMm(textStyle) {
+function normalizePaddingMm(textStyle, defaultValue) {
   if (typeof textStyle.paddingMm === "number") return textStyle.paddingMm;
   if (textStyle.hasPadding === false) return 0;
-  return DEFAULT_TEXT_STYLE.paddingMm;
+  return defaultValue;
+}
+
+function clampNumber(value, min, max) {
+  if (typeof value !== "number") return min;
+  return Math.min(Math.max(value, min), max);
 }
