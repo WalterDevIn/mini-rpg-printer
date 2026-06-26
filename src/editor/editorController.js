@@ -3,13 +3,16 @@ import {
   addBlockToPage,
   addSpread as addSpreadToDocument,
   deleteBlock,
+  moveBlockToPage,
   updateBlockFrame as updateDocumentBlockFrame,
   updateBlockProps as updateDocumentBlockProps,
 } from "../document/documentCommands.js";
 import { findBlockById, getFirstPage } from "../document/documentQueries.js";
 
+const DROP_ANIMATION_MS = 180;
+
 export function createEditorController({ editorState, render }) {
-  function commitTextEdit(readText) {
+  function commitTextEdit(readText, { shouldRender = true } = {}) {
     const blockId = editorState.interaction.editingBlockId;
     if (!blockId) return;
 
@@ -20,6 +23,8 @@ export function createEditorController({ editorState, render }) {
 
     editorState.interaction.editingBlockId = null;
     editorState.interaction.mode = "idle";
+
+    if (shouldRender) render();
   }
 
   return {
@@ -57,7 +62,7 @@ export function createEditorController({ editorState, render }) {
     },
 
     clearSelection(readText) {
-      commitTextEdit(readText);
+      commitTextEdit(readText, { shouldRender: false });
       editorState.selection = { blockId: null, pageId: null };
       editorState.interaction.contextMenu = null;
       render();
@@ -73,15 +78,47 @@ export function createEditorController({ editorState, render }) {
       render();
     },
 
-    commitTextEdit(readText) {
-      commitTextEdit(readText);
-      render();
+    commitTextEdit(readText, options) {
+      commitTextEdit(readText, options);
     },
 
     cancelTextEdit() {
       editorState.interaction.editingBlockId = null;
       editorState.interaction.mode = "idle";
       render();
+    },
+
+    beginBlockDrag(blockId, pageId) {
+      editorState.selection = { blockId, pageId };
+      editorState.interaction.mode = "dragging-block";
+      editorState.interaction.draggingBlockId = blockId;
+      editorState.interaction.droppingBlockId = null;
+      editorState.interaction.contextMenu = null;
+      render();
+    },
+
+    moveBlock(blockId, targetPageId, frame) {
+      const movedBlock = moveBlockToPage(editorState.document, blockId, targetPageId);
+      if (!movedBlock) return;
+
+      updateDocumentBlockFrame(editorState.document, blockId, frame);
+      editorState.selection = { blockId, pageId: targetPageId };
+      editorState.interaction.draggingBlockId = blockId;
+      editorState.interaction.mode = "dragging-block";
+      render();
+    },
+
+    endBlockDrag(blockId) {
+      editorState.interaction.mode = "idle";
+      editorState.interaction.draggingBlockId = null;
+      editorState.interaction.droppingBlockId = blockId;
+      render();
+
+      window.setTimeout(() => {
+        if (editorState.interaction.droppingBlockId !== blockId) return;
+        editorState.interaction.droppingBlockId = null;
+        render();
+      }, DROP_ANIMATION_MS);
     },
 
     updateBlockFrame(blockId, frame) {
@@ -95,7 +132,7 @@ export function createEditorController({ editorState, render }) {
     },
 
     openBlockContextMenu(blockId, clientX, clientY, readText) {
-      commitTextEdit(readText);
+      commitTextEdit(readText, { shouldRender: false });
       const found = findBlockById(editorState.document, blockId);
       if (!found) return;
 
