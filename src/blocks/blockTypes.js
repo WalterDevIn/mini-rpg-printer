@@ -3,4 +3,5 @@ export const BLOCK_TYPES = {
   line: "line",
   ruledText: "ruledText",
   gridBlock: "gridBlock",
+  image: "image",
 };
