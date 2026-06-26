@@ -6,6 +6,7 @@ export function createEditorState() {
     viewport: {
       zoom: 1,
       showGrid: true,
+      showPageMargin: false,
     },
     selection: {
       blockId: null,
