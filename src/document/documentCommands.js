@@ -1,9 +1,9 @@
-import { createBlock, createSpreadWithPages } from "./documentFactory.js";
+import { createBlock, createSpread } from "./documentFactory.js";
 import { findBlockById, getFirstPage } from "./documentQueries.js";
 import { constrainFrameToPage } from "../shared/geometry.js";
 
 export function addSpread(documentModel) {
-  const spread = createSpreadWithPages();
+  const spread = createSpread();
   documentModel.spreads.push(spread);
   return spread;
 }
