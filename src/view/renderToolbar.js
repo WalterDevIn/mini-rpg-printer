@@ -1,3 +1,4 @@
+import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { hasSelection } from "../editor/editorSelectors.js";
 import { el, iconButton } from "../shared/dom.js";
 
@@ -7,8 +8,23 @@ export function renderToolbar({ editorState, controller }) {
     el("div", { className: "toolbar__group" }, [
       iconButton({
         iconClass: "fa-solid fa-font",
-        label: "Agregar bloque de texto",
-        onClick: () => controller.addTextBlock(),
+        label: "Agregar texto libre",
+        onClick: () => controller.addBlock(BLOCK_TYPES.text),
+      }),
+      iconButton({
+        iconClass: "fa-solid fa-minus",
+        label: "Agregar línea",
+        onClick: () => controller.addBlock(BLOCK_TYPES.line),
+      }),
+      iconButton({
+        iconClass: "fa-solid fa-align-left",
+        label: "Agregar texto normal",
+        onClick: () => controller.addBlock(BLOCK_TYPES.ruledText),
+      }),
+      iconButton({
+        iconClass: "fa-solid fa-border-all",
+        label: "Agregar bloque de cuadrícula",
+        onClick: () => controller.addBlock(BLOCK_TYPES.gridBlock),
       }),
       iconButton({
         iconClass: "fa-regular fa-clone",
@@ -31,7 +47,7 @@ export function renderToolbar({ editorState, controller }) {
     el("div", { className: "toolbar__spacer" }),
     el("div", {
       className: "hint",
-      textContent: "Documento imprimible · Bloques en mm · Snap 5 mm · Click derecho abre propiedades",
+      textContent: "Documento imprimible · Bloques en mm · Click derecho abre propiedades",
     }),
   ]);
 }
