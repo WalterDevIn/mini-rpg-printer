@@ -73,18 +73,26 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
 
   const content = el("div", {
     className: "block__content block__content--text",
-    textContent: block.props.text,
-    dataset: { editableId: block.id },
     style: {
-      padding: textStyle.hasPadding ? "1mm" : "0",
+      padding: `${textStyle.paddingMm}mm`,
       justifyContent: getJustifyContent(textStyle.horizontalAlign),
       alignItems: getAlignItems(textStyle.verticalAlign),
-      textAlign: textStyle.horizontalAlign,
     },
     on: {
       pointerdown: (event) => {
         if (isEditing) event.stopPropagation();
       },
+    },
+  });
+
+  const text = el("div", {
+    className: "block__text",
+    textContent: block.props.text,
+    dataset: { editableId: block.id },
+    style: {
+      textAlign: textStyle.horizontalAlign,
+    },
+    on: {
       keydown: (event) => {
         if (!isEditing) return;
 
@@ -100,8 +108,9 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
       },
     },
   });
-  content.contentEditable = isEditing ? "true" : "false";
+  text.contentEditable = isEditing ? "true" : "false";
 
+  content.appendChild(text);
   blockElement.appendChild(content);
 
   if (isSelected && !isEditing) {
