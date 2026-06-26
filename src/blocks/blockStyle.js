@@ -13,7 +13,7 @@ export const DEFAULT_COMMON_STYLE = {
 export const DEFAULT_TEXT_STYLE = {
   horizontalAlign: "center",
   verticalAlign: "middle",
-  hasPadding: true,
+  paddingMm: 1,
 };
 
 export function getCommonStyle(block) {
@@ -26,10 +26,36 @@ export function getCommonStyle(block) {
 }
 
 export function getTextStyle(block) {
-  return {
+  const nextStyle = {
     ...DEFAULT_TEXT_STYLE,
     horizontalAlign: block.props.textAlign ?? DEFAULT_TEXT_STYLE.horizontalAlign,
     verticalAlign: block.props.verticalAlign ?? DEFAULT_TEXT_STYLE.verticalAlign,
     ...block.props.textStyle,
   };
+
+  return {
+    ...nextStyle,
+    horizontalAlign: normalizeHorizontalAlign(nextStyle.horizontalAlign),
+    verticalAlign: normalizeVerticalAlign(nextStyle.verticalAlign),
+    paddingMm: normalizePaddingMm(nextStyle),
+  };
+}
+
+function normalizeHorizontalAlign(value) {
+  if (["left", "center", "right"].includes(value)) return value;
+  return DEFAULT_TEXT_STYLE.horizontalAlign;
+}
+
+function normalizeVerticalAlign(value) {
+  if (["start", "middle", "end"].includes(value)) return value;
+  if (value === "top") return "start";
+  if (value === "center") return "middle";
+  if (value === "bottom") return "end";
+  return DEFAULT_TEXT_STYLE.verticalAlign;
+}
+
+function normalizePaddingMm(textStyle) {
+  if (typeof textStyle.paddingMm === "number") return textStyle.paddingMm;
+  if (textStyle.hasPadding === false) return 0;
+  return DEFAULT_TEXT_STYLE.paddingMm;
 }
