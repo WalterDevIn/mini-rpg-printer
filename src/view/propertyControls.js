@@ -27,6 +27,21 @@ export function selectControl({ value, options, onChange }) {
   return select;
 }
 
+export function textControl({ value, placeholder = "", onChange }) {
+  return el("input", {
+    className: "property-control",
+    type: "text",
+    value,
+    attrs: {
+      placeholder,
+    },
+    on: {
+      keydown: stopEditorShortcut,
+      change: (event) => onChange(event.target.value),
+    },
+  });
+}
+
 export function numberControl({ value, min, max, step = 1, onChange }) {
   return el("input", {
     className: "property-control",
