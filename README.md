@@ -23,6 +23,8 @@ La aplicación edita documentos diseñados para impresión. El documento interno
 - Toggle para mostrar u ocultar la grilla.
 - Bloque inicial disponible: bloque de texto centrado.
 - Los bloques se mueven y redimensionan con snap obligatorio de `5mm`.
+- Los bloques pueden arrastrarse entre páginas.
+- Mientras se arrastra, el bloque se eleva y se tuerce levemente; al soltarlo hace una pequeña animación de caída.
 - Segundo click sobre un bloque ya seleccionado para editar texto.
 - `Enter` confirma la edición.
 - Click fuera u otro bloque cierra la edición actual.
