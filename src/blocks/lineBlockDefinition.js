@@ -3,6 +3,7 @@ import { BLOCK_TYPES } from "./blockTypes.js";
 export const LINE_BLOCK_DEFAULT_PROPS = {
   style: {
     backgroundColor: "#111827",
+    textColor: "#111827",
     fontFamily: "Arial",
     fontSizePt: 11,
     hasBorder: false,
@@ -14,7 +15,7 @@ export const LINE_BLOCK_DEFAULT_PROPS = {
   },
   line: {
     angleDeg: 0,
-    thicknessMm: 0.5,
+    thicknessMm: 0.75,
   },
 };
 
@@ -26,7 +27,7 @@ export const LINE_BLOCK_DEFINITION = {
     x: 10,
     y: 10,
     width: 40,
-    height: 5,
+    height: 1,
   },
   defaultProps: LINE_BLOCK_DEFAULT_PROPS,
 };
