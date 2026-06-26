@@ -1,8 +1,8 @@
-import { createInitialPrintDocument } from "../document/documentFactory.js";
+import { createPrintDocument } from "../document/documentFactory.js";
 
 export function createEditorState() {
   return {
-    document: createInitialPrintDocument(),
+    document: createPrintDocument(),
     viewport: {
       zoom: 1,
       showGrid: true,
