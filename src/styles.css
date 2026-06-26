@@ -279,10 +279,32 @@ button:hover:not(:disabled) {
   display: grid;
 }
 
+.block__content--ruled-text {
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(5mm - 1px), rgba(31, 35, 40, 0.18) calc(5mm - 1px), rgba(31, 35, 40, 0.18) 5mm);
+  background-size: 100% 5mm;
+}
+
+.block__content--grid-block {
+  background-blend-mode: normal;
+}
+
 .block__text {
   max-width: 100%;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.block__text--ruled {
+  width: 100%;
+  min-height: 100%;
+}
+
+.block__line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  transform-origin: center;
 }
 
 .resize-handle {
