@@ -38,6 +38,7 @@ src/
   main.js                       # Entry point mínimo
   app/
     createEditorApp.js           # Composition root de la aplicación
+    preserveScroll.js            # Conserva scroll del viewport entre renders
   document/
     printSpec.js                 # Tamaño físico, grilla e intención de impresión
     documentFactory.js            # Crea documentos, páginas, spreads y bloques
@@ -46,6 +47,7 @@ src/
   blocks/
     blockTypes.js                # Tipos de bloque soportados
     blockRegistry.js             # Registro extensible de bloques
+    blockStyle.js                # Defaults y normalización de estilos de bloque
     textBlockDefinition.js        # Definición del bloque de texto
   editor/
     editorState.js               # Estado de editor: documento, viewport, selección, interacción
@@ -65,25 +67,31 @@ src/
     renderEditor.js              # Vista raíz
     renderToolbar.js             # Toolbar
     renderCanvas.js              # Canvas, spreads y páginas
-    renderBlock.js               # Render de bloques tipados
-    renderContextMenu.js          # Menú contextual de propiedades
+    renderBlock.js               # Dispatcher de render por tipo de bloque
+    renderTextBlock.js           # Render específico del bloque de texto
+    blockStyleCss.js             # Traducción de estilo de bloque a CSS inline
+    blockPropertySections.js      # Secciones del inspector de propiedades
+    propertyControls.js          # Controles reutilizables del inspector
+    floatingMenuPosition.js       # Posicionamiento de menú dentro del viewport
+    renderContextMenu.js          # Shell del menú contextual de propiedades
   shared/
     createId.js                  # IDs
     dom.js                       # Helpers DOM
     geometry.js                  # Conversión px/mm, snap y constraints
+    objectMerge.js               # Merge profundo para props anidadas
 ```
 
 ## Criterio de capas
 
 `document/` no sabe nada del DOM. Define el documento imprimible y sus comandos.
 
-`blocks/` define tipos de bloque. Para agregar un bloque nuevo, se agrega su definición y luego su render.
+`blocks/` define tipos de bloque, defaults y normalización de estilo. No renderiza DOM.
 
 `editor/` maneja selección, herramienta activa, edición, drag, resize y comandos de usuario.
 
 `editor/interaction/` contiene interacciones pointer específicas. No define el documento, sólo calcula y confirma operaciones mediante el controller.
 
-`view/` sólo renderiza y captura eventos.
+`view/` renderiza DOM, captura eventos de UI y traduce estilos normalizados a CSS.
 
 `shared/` contiene utilidades sin dependencia del dominio.
 
@@ -91,8 +99,10 @@ src/
 
 1. Crear una definición en `src/blocks/` con `type`, `label`, `iconClass`, `defaultFrame` y `defaultProps`.
 2. Registrar el tipo en `blockRegistry.js`.
-3. Agregar su render en `renderBlock.js`.
-4. Agregar un botón o herramienta en `renderToolbar.js`.
+3. Agregar su render específico en `view/`.
+4. Agregar el caso del tipo nuevo en `renderBlock.js`.
+5. Agregar sus propiedades específicas en `blockPropertySections.js`, si necesita inspector propio.
+6. Agregar un botón o herramienta en `renderToolbar.js`.
 
 ## Próximos pasos razonables
 
