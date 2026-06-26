@@ -14,9 +14,14 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#app {
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
   color: var(--ink);
   background: var(--app-bg);
 }
@@ -36,7 +41,12 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+button:hover:not(:disabled) {
   border-color: #aab0b8;
   background: #f7f8fa;
 }
@@ -53,6 +63,7 @@ button:hover {
   z-index: 20;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   padding: 10px 14px;
   background: var(--panel-bg);
@@ -188,4 +199,20 @@ button:hover {
 .hint {
   color: var(--muted);
   font-size: 13px;
+}
+
+.boot-error {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 24px;
+  border: 1px solid #f0b6b6;
+  border-radius: 14px;
+  background: #fff5f5;
+}
+
+.boot-error pre {
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: white;
 }
