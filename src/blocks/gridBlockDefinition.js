@@ -1,7 +1,7 @@
 import { BLOCK_TYPES } from "./blockTypes.js";
 
 export const GRID_BLOCK_DEFAULT_PROPS = {
-  text: "Texto en cuadrícula",
+  text: "",
   style: {
     backgroundColor: "#ffffff",
     textColor: "#1f2328",
