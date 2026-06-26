@@ -184,6 +184,11 @@ button:hover:not(:disabled) {
   transform-origin: center;
 }
 
+.block--line {
+  min-height: 0.5mm;
+  min-width: 5mm;
+}
+
 .block.is-selected {
   border-color: var(--selected) !important;
   outline: 1px solid var(--selected);
@@ -280,7 +285,6 @@ button:hover:not(:disabled) {
 }
 
 .block__content--ruled-text {
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(5mm - 1px), rgba(31, 35, 40, 0.18) calc(5mm - 1px), rgba(31, 35, 40, 0.18) 5mm);
   background-size: 100% 5mm;
 }
 
@@ -304,6 +308,7 @@ button:hover:not(:disabled) {
   left: 0;
   top: 50%;
   width: 100%;
+  transform: translateY(-50%);
   transform-origin: center;
 }
 
