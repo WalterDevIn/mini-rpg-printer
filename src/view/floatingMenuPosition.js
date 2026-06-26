@@ -1,6 +1,6 @@
 const VIEWPORT_MARGIN_PX = 8;
 const DEFAULT_MENU_WIDTH_PX = 260;
-const DEFAULT_MENU_HEIGHT_PX = 520;
+const DEFAULT_MENU_HEIGHT_PX = 420;
 
 export function getFloatingMenuStyle({ x, y, width = DEFAULT_MENU_WIDTH_PX, height = DEFAULT_MENU_HEIGHT_PX }) {
   const viewportWidth = window.innerWidth;
