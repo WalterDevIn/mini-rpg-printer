@@ -2,7 +2,8 @@ import { getCommonStyle, getInternalGridStyle, getRuledTextStyle } from "../bloc
 import { isEditingBlock } from "../editor/editorSelectors.js";
 import { el } from "../shared/dom.js";
 import { createBlockElement, createEditableTextElement } from "./blockChrome.js";
-import { gridBackgroundToCss, ruledTextContainerStyleToCss, ruledTextStyleToCss } from "./blockStyleCss.js";
+import { ruledTextContainerStyleToCss, ruledTextStyleToCss } from "./blockStyleCss.js";
+import { gridBackgroundToCss } from "./gridCss.js";
 
 export function renderGridBlock({ block, page, pageElement, editorState, controller }) {
   const isEditing = isEditingBlock(editorState, block.id);
