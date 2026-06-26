@@ -1,11 +1,31 @@
 export function gridBackgroundToCss(gridStyle) {
-  const color = hexToRgb(gridStyle.color);
-  const rgba = `rgba(${color.r}, ${color.g}, ${color.b}, ${gridStyle.opacity})`;
+  const rgba = colorToRgba(gridStyle.color, gridStyle.opacity);
 
   return {
     backgroundImage: `linear-gradient(to right, ${rgba} 1px, transparent 1px), linear-gradient(to bottom, ${rgba} 1px, transparent 1px)`,
     backgroundSize: `${gridStyle.sizeMm}mm ${gridStyle.sizeMm}mm`,
   };
+}
+
+export function lineBackgroundToCss(ruledTextStyle) {
+  if (!ruledTextStyle.showLines) {
+    return {
+      backgroundImage: "none",
+      backgroundSize: "auto",
+    };
+  }
+
+  const rgba = colorToRgba(ruledTextStyle.lineColor, ruledTextStyle.lineOpacity);
+
+  return {
+    backgroundImage: `repeating-linear-gradient(to bottom, transparent 0, transparent calc(5mm - 1px), ${rgba} calc(5mm - 1px), ${rgba} 5mm)`,
+    backgroundSize: "100% 5mm",
+  };
+}
+
+function colorToRgba(hex, opacity) {
+  const color = hexToRgb(hex);
+  return `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
 }
 
 function hexToRgb(hex) {
