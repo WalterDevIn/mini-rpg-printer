@@ -3,6 +3,7 @@ import { clamp, pointerToPageMm, safeReleasePointerCapture, snapMm } from "../sh
 import { focusEditable, readEditedText } from "./textEditing.js";
 
 const CLICK_MOVE_THRESHOLD_PX = 4;
+const HOLD_TO_PICKUP_MS = 170;
 
 function getPageElementUnderPointer(event, fallbackPageElement) {
   const elementUnderPointer = document.elementFromPoint(event.clientX, event.clientY);
@@ -33,7 +34,19 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
   };
   const startClient = { x: event.clientX, y: event.clientY };
   let moved = false;
+  let pickedUp = false;
+  let released = false;
   let activePageElement = pageElement;
+
+  function beginPickup(targetPageId = page.id) {
+    if (pickedUp || released) return;
+    pickedUp = true;
+    controller.beginBlockPickup(block.id, targetPageId);
+  }
+
+  const holdTimer = window.setTimeout(() => {
+    beginPickup(page.id);
+  }, HOLD_TO_PICKUP_MS);
 
   controller.commitTextEdit(readEditedText, { shouldRender: false });
   editorState.selection = { blockId: block.id, pageId: page.id };
@@ -58,27 +71,26 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
 
     activePageElement = targetPageElement;
 
+    beginPickup(targetPageId);
+
     const nextFrame = getDraggedFrame(moveEvent, block, targetPageElement, pointerOffsetMm);
-
-    if (editorState.interaction.draggingBlockId !== block.id) {
-      controller.beginBlockDrag(block.id, targetPageId);
-    }
-
     controller.moveBlock(block.id, targetPageId, nextFrame);
   };
 
   const up = (upEvent) => {
+    released = true;
+    window.clearTimeout(holdTimer);
     safeReleasePointerCapture(pageElement, upEvent.pointerId);
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
 
-    if (wasSelected && !moved) {
+    if (wasSelected && !moved && !pickedUp) {
       controller.startTextEdit(block.id);
       focusEditable(block.id);
       return;
     }
 
-    if (moved) {
+    if (pickedUp) {
       const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
       const dropPageId = getPageIdFromElement(dropPageElement) ?? editorState.selection.pageId ?? page.id;
       controller.endBlockDrag(block.id);
