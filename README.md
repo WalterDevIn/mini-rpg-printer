@@ -51,7 +51,14 @@ src/
     editorState.js               # Estado de editor: documento, viewport, selección, interacción
     editorController.js           # Acciones de aplicación; traduce UI a comandos
     editorSelectors.js            # Selectores derivados del estado
-    blockInteraction.js           # Drag, resize, edición por click
+    blockInteraction.js           # Fachada pública de interacción usada por la vista
+    interaction/
+      blockDragSession.js         # Sesión de drag: ghost, long press, drop y commit final
+      blockResizeSession.js       # Sesión de resize sin re-render continuo
+      dragGhost.js                # Ghost visual usado durante drag
+      frameMath.js                # Cálculo de frames en mm y px
+      interactionConstants.js     # Umbrales y duraciones de interacción
+      pageHitTesting.js           # Detección de página bajo el puntero
     installEditorEvents.js        # Atajos y eventos globales
     textEditing.js                # Helpers DOM de edición textual
   view/
@@ -73,6 +80,8 @@ src/
 `blocks/` define tipos de bloque. Para agregar un bloque nuevo, se agrega su definición y luego su render.
 
 `editor/` maneja selección, herramienta activa, edición, drag, resize y comandos de usuario.
+
+`editor/interaction/` contiene interacciones pointer específicas. No define el documento, sólo calcula y confirma operaciones mediante el controller.
 
 `view/` sólo renderiza y captura eventos.
 
