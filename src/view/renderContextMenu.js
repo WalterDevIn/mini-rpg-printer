@@ -2,6 +2,7 @@ import { getCommonStyle, getTextStyle } from "../blocks/blockStyle.js";
 import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { findBlockById } from "../document/documentQueries.js";
 import { el } from "../shared/dom.js";
+import { getFloatingMenuStyle } from "./floatingMenuPosition.js";
 import {
   buttonGroup,
   checkboxControl,
@@ -38,7 +39,7 @@ function renderCommonProperties({ block, controller }) {
   const style = getCommonStyle(block);
 
   return section("Bloque", [
-    field("Color de fondo", colorControl({
+    field("Fondo", colorControl({
       value: style.backgroundColor,
       onChange: (value) => updateCommonStyle(controller, block, { backgroundColor: value }),
     })),
@@ -47,7 +48,7 @@ function renderCommonProperties({ block, controller }) {
       options: FONT_OPTIONS,
       onChange: (value) => updateCommonStyle(controller, block, { fontFamily: value }),
     })),
-    field("Tamaño de fuente", numberControl({
+    field("Tamaño", numberControl({
       value: style.fontSizePt,
       min: 6,
       max: 72,
@@ -58,7 +59,7 @@ function renderCommonProperties({ block, controller }) {
       checked: style.hasBorder,
       onChange: (value) => updateCommonStyle(controller, block, { hasBorder: value }),
     })),
-    field("Radio del borde", numberControl({
+    field("Radio", numberControl({
       value: style.borderRadiusMm,
       min: 0,
       max: 20,
@@ -74,18 +75,21 @@ function renderCommonProperties({ block, controller }) {
     })),
     field("Estilo", buttonGroup([
       toggleButton({
-        label: "Negrita",
+        label: "B",
         active: style.bold,
+        title: "Negrita",
         onClick: () => updateCommonStyle(controller, block, { bold: !style.bold }),
       }),
       toggleButton({
-        label: "Cursiva",
+        label: "I",
         active: style.italic,
+        title: "Cursiva",
         onClick: () => updateCommonStyle(controller, block, { italic: !style.italic }),
       }),
       toggleButton({
-        label: "Tachado",
+        label: "S",
         active: style.strike,
+        title: "Tachado",
         onClick: () => updateCommonStyle(controller, block, { strike: !style.strike }),
       }),
     ])),
@@ -98,7 +102,7 @@ function renderTextProperties({ block, controller }) {
   if (block.type !== BLOCK_TYPES.text) return null;
 
   return section("Texto", [
-    field("Disposición horizontal", selectControl({
+    field("Horizontal", selectControl({
       value: textStyle.horizontalAlign,
       options: [
         { label: "Izquierda", value: "left" },
@@ -107,7 +111,7 @@ function renderTextProperties({ block, controller }) {
       ],
       onChange: (value) => updateTextStyle(controller, block, { horizontalAlign: value }),
     })),
-    field("Disposición vertical", selectControl({
+    field("Vertical", selectControl({
       value: textStyle.verticalAlign,
       options: [
         { label: "Arriba", value: "start" },
@@ -132,16 +136,14 @@ export function renderContextMenu({ editorState, controller }) {
 
   return el("div", {
     className: "context-menu property-menu",
-    style: {
-      left: `${menu.x}px`,
-      top: `${menu.y}px`,
-    },
+    style: getFloatingMenuStyle({ x: menu.x, y: menu.y }),
     on: {
       pointerdown: (event) => event.stopPropagation(),
+      keydown: (event) => event.stopPropagation(),
       contextmenu: (event) => event.preventDefault(),
     },
   }, [
-    el("div", { className: "context-menu__title", textContent: "Editar bloque" }),
+    el("div", { className: "context-menu__title", textContent: "Editar" }),
     renderCommonProperties({ block: found.block, controller }),
     renderTextProperties({ block: found.block, controller }),
   ]);
