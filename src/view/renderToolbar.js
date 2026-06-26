@@ -1,6 +1,7 @@
 import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { hasSelection } from "../editor/editorSelectors.js";
 import { el, iconButton } from "../shared/dom.js";
+import { renderSettingsPanel } from "./renderSettingsPanel.js";
 
 export function renderToolbar({ editorState, controller }) {
   return el("header", { className: "toolbar" }, [
@@ -64,6 +65,7 @@ export function renderToolbar({ editorState, controller }) {
         onClick: () => controller.deleteSelectedBlock(),
       }),
     ]),
+    renderSettingsPanel({ editorState, controller }),
     el("div", { className: "toolbar__spacer" }),
     el("div", {
       className: "hint",
