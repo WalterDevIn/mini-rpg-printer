@@ -5,6 +5,7 @@ import { el } from "./dom.js";
 import { openFontContextMenu } from "./contextMenu.js";
 
 const CLICK_MOVE_THRESHOLD_PX = 4;
+const MIN_BLOCK_SIZE_MM = 5;
 
 function readEditedText(blockId) {
   return document.querySelector(`[data-editable-id="${blockId}"]`)?.innerText;
@@ -48,8 +49,8 @@ function startResizing(event, block, pageElement, render) {
     const nextWidth = snap(startWidth + current.x - startPointer.x);
     const nextHeight = snap(startHeight + current.y - startPointer.y);
 
-    block.width = clamp(nextWidth, 5, PAGE_WIDTH_MM - block.x);
-    block.height = clamp(nextHeight, 5, PAGE_HEIGHT_MM - block.y);
+    block.width = clamp(nextWidth, MIN_BLOCK_SIZE_MM, PAGE_WIDTH_MM - block.x);
+    block.height = clamp(nextHeight, MIN_BLOCK_SIZE_MM, PAGE_HEIGHT_MM - block.y);
     render();
   };
 
@@ -67,7 +68,6 @@ function startMoveOrEdit(event, block, pageElement, render) {
   event.stopPropagation();
 
   const wasSelected = state.selectedId === block.id;
-  const startedEditing = state.editingId === block.id;
   const startPointer = mmFromPointer(event, pageElement);
   const startClient = { x: event.clientX, y: event.clientY };
   const startBlock = { x: block.x, y: block.y };
@@ -79,7 +79,7 @@ function startMoveOrEdit(event, block, pageElement, render) {
 
   pageElement.setPointerCapture?.(event.pointerId);
 
-  if (!wasSelected || startedEditing) {
+  if (!wasSelected) {
     render();
   }
 
@@ -91,7 +91,7 @@ function startMoveOrEdit(event, block, pageElement, render) {
       moved = true;
     }
 
-    if (!moved || startedEditing) return;
+    if (!moved) return;
 
     const current = mmFromPointer(moveEvent, pageElement);
     const nextX = snap(startBlock.x + current.x - startPointer.x);
@@ -106,8 +106,6 @@ function startMoveOrEdit(event, block, pageElement, render) {
     safeReleasePointerCapture(pageElement, upEvent.pointerId);
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
-
-    if (startedEditing) return;
 
     if (wasSelected && !moved) {
       enterEditMode(block.id, render);
@@ -151,6 +149,11 @@ export function textBlockComponent(block, pageElement, { render }) {
     textContent: block.text,
     dataset: { editableId: block.id },
     on: {
+      pointerdown: (event) => {
+        if (isEditing) {
+          event.stopPropagation();
+        }
+      },
       keydown: (event) => {
         if (!isEditing) return;
 
