@@ -2,23 +2,6 @@ import { getBlockDefinition } from "../blocks/blockRegistry.js";
 import { PAGE_SPEC, PRINT_DOCUMENT_VERSION, PRINT_INTENT } from "./printSpec.js";
 import { createId } from "../shared/createId.js";
 
-export function createPrintDocument() {
-  return {
-    version: PRINT_DOCUMENT_VERSION,
-    intent: PRINT_INTENT,
-    pageSpec: PAGE_SPEC,
-    spreads: [createSpread()],
-  };
-}
-
-export function createSpread() {
-  return {
-    id: createId("spread"),
-    pageIds: [createPage().id, createPage().id],
-    pages: [],
-  };
-}
-
 export function createPage() {
   return {
     id: createId("page"),
@@ -26,7 +9,7 @@ export function createPage() {
   };
 }
 
-export function createSpreadWithPages() {
+export function createSpread() {
   const pages = [createPage(), createPage()];
 
   return {
@@ -53,11 +36,11 @@ export function createBlock(type, overrides = {}) {
   };
 }
 
-export function createInitialPrintDocument() {
+export function createPrintDocument() {
   return {
     version: PRINT_DOCUMENT_VERSION,
     intent: PRINT_INTENT,
     pageSpec: PAGE_SPEC,
-    spreads: [createSpreadWithPages()],
+    spreads: [createSpread()],
   };
 }
