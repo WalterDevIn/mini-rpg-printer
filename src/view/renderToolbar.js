@@ -27,6 +27,11 @@ export function renderToolbar({ editorState, controller }) {
         onClick: () => controller.addBlock(BLOCK_TYPES.gridBlock),
       }),
       iconButton({
+        iconClass: "fa-regular fa-image",
+        label: "Agregar imagen",
+        onClick: () => controller.addBlock(BLOCK_TYPES.image),
+      }),
+      iconButton({
         iconClass: "fa-regular fa-clone",
         label: "Agregar par de hojas",
         onClick: () => controller.addSpread(),
