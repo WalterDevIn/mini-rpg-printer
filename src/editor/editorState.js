@@ -14,6 +14,7 @@ export function createEditorState() {
     interaction: {
       mode: "idle",
       editingBlockId: null,
+      pickingBlockId: null,
       draggingBlockId: null,
       droppingBlockId: null,
       contextMenu: null,
