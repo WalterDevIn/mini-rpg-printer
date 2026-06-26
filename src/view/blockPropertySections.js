@@ -56,6 +56,10 @@ export function renderCommonProperties({ block, controller }) {
       value: style.backgroundColor,
       onChange: (value) => updateCommonStyle(controller, block, { backgroundColor: value }),
     })),
+    field("Color", colorControl({
+      value: style.textColor,
+      onChange: (value) => updateCommonStyle(controller, block, { textColor: value }),
+    })),
     field("Fuente", selectControl({
       value: style.fontFamily,
       options: FONT_OPTIONS,
@@ -200,6 +204,21 @@ function renderRuledTextProperties({ block, controller }) {
       step: 0.5,
       onChange: (value) => updateRuledTextStyle(controller, block, { paddingMm: value }),
     })),
+    field("Mostrar líneas", checkboxControl({
+      checked: ruledTextStyle.showLines,
+      onChange: (value) => updateRuledTextStyle(controller, block, { showLines: value }),
+    })),
+    field("Color líneas", colorControl({
+      value: ruledTextStyle.lineColor,
+      onChange: (value) => updateRuledTextStyle(controller, block, { lineColor: value }),
+    })),
+    field("Opacidad líneas", numberControl({
+      value: ruledTextStyle.lineOpacity,
+      min: 0,
+      max: 1,
+      step: 0.05,
+      onChange: (value) => updateRuledTextStyle(controller, block, { lineOpacity: value }),
+    })),
   ]);
 }
 
@@ -209,7 +228,10 @@ function renderInternalGridProperties({ block, controller }) {
   return section("Cuadrícula interna", [
     field("Color", colorControl({
       value: gridStyle.color,
-      onChange: (value) => updateInternalGridStyle(controller, block, { color: value }),
+      onChange: (value) => {
+        updateCommonStyle(controller, block, { borderColor: value });
+        updateInternalGridStyle(controller, block, { color: value });
+      },
     })),
     field("Opacidad", numberControl({
       value: gridStyle.opacity,
