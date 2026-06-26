@@ -24,6 +24,26 @@ export function addBlockToPage(documentModel, pageId, type, overrides = {}) {
   return block;
 }
 
+export function cloneBlockToPage(documentModel, sourceBlock, targetPageId, frameOffset = { x: 5, y: 5 }) {
+  const page = targetPageId
+    ? findPageById(documentModel, targetPageId)?.page
+    : getFirstPage(documentModel);
+
+  if (!page || !sourceBlock) return null;
+
+  const block = createBlock(sourceBlock.type, {
+    frame: constrainFrameToPage({
+      ...sourceBlock.frame,
+      x: sourceBlock.frame.x + frameOffset.x,
+      y: sourceBlock.frame.y + frameOffset.y,
+    }, documentModel.pageSpec, getMinimumFrameSize(sourceBlock)),
+    props: structuredClone(sourceBlock.props),
+  });
+
+  page.blocks.push(block);
+  return block;
+}
+
 export function deleteBlock(documentModel, blockId) {
   const found = findBlockById(documentModel, blockId);
   if (!found) return false;
