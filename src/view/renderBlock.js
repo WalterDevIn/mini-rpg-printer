@@ -1,3 +1,4 @@
+import { getCommonStyle, getTextStyle } from "../blocks/blockStyle.js";
 import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { handleBlockPointerDown, handleResizePointerDown } from "../editor/blockInteraction.js";
 import { isEditingBlock } from "../editor/editorSelectors.js";
@@ -17,17 +18,42 @@ function getBlockClassName({ block, editorState, isSelected, isEditing }) {
   ].filter(Boolean).join(" ");
 }
 
+function getContentPlaceItems(textStyle) {
+  const verticalMap = {
+    start: "start",
+    middle: "center",
+    end: "end",
+  };
+
+  const horizontalMap = {
+    left: "start",
+    center: "center",
+    right: "end",
+  };
+
+  return `${verticalMap[textStyle.verticalAlign]} ${horizontalMap[textStyle.horizontalAlign]}`;
+}
+
 function renderTextBlock({ block, page, pageElement, editorState, controller }) {
   const isSelected = editorState.selection.blockId === block.id;
   const isEditing = isEditingBlock(editorState, block.id);
+  const commonStyle = getCommonStyle(block);
+  const textStyle = getTextStyle(block);
 
   const blockElement = el("article", {
     className: getBlockClassName({ block, editorState, isSelected, isEditing }),
     style: {
       ...frameToCss(block.frame),
-      fontFamily: block.props.fontFamily,
-      fontSize: `${block.props.fontSizePt}pt`,
-      textAlign: block.props.textAlign,
+      zIndex: String(commonStyle.layer),
+      backgroundColor: commonStyle.backgroundColor,
+      borderStyle: commonStyle.hasBorder ? "solid" : "none",
+      borderRadius: `${commonStyle.borderRadiusMm}mm`,
+      fontFamily: commonStyle.fontFamily,
+      fontSize: `${commonStyle.fontSizePt}pt`,
+      fontWeight: commonStyle.bold ? "700" : "400",
+      fontStyle: commonStyle.italic ? "italic" : "normal",
+      textDecoration: commonStyle.strike ? "line-through" : "none",
+      textAlign: textStyle.horizontalAlign,
     },
     on: {
       pointerdown: (event) => {
@@ -46,6 +72,10 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
     className: "block__content block__content--text",
     textContent: block.props.text,
     dataset: { editableId: block.id },
+    style: {
+      padding: textStyle.hasPadding ? "1mm" : "0",
+      placeItems: getContentPlaceItems(textStyle),
+    },
     on: {
       pointerdown: (event) => {
         if (isEditing) event.stopPropagation();
