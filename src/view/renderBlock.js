@@ -18,20 +18,24 @@ function getBlockClassName({ block, editorState, isSelected, isEditing }) {
   ].filter(Boolean).join(" ");
 }
 
-function getContentPlaceItems(textStyle) {
-  const verticalMap = {
-    start: "start",
-    middle: "center",
-    end: "end",
-  };
-
-  const horizontalMap = {
-    left: "start",
+function getJustifyContent(horizontalAlign) {
+  const map = {
+    left: "flex-start",
     center: "center",
-    right: "end",
+    right: "flex-end",
   };
 
-  return `${verticalMap[textStyle.verticalAlign]} ${horizontalMap[textStyle.horizontalAlign]}`;
+  return map[horizontalAlign] ?? "center";
+}
+
+function getAlignItems(verticalAlign) {
+  const map = {
+    start: "flex-start",
+    middle: "center",
+    end: "flex-end",
+  };
+
+  return map[verticalAlign] ?? "center";
 }
 
 function renderTextBlock({ block, page, pageElement, editorState, controller }) {
@@ -53,7 +57,6 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
       fontWeight: commonStyle.bold ? "700" : "400",
       fontStyle: commonStyle.italic ? "italic" : "normal",
       textDecoration: commonStyle.strike ? "line-through" : "none",
-      textAlign: textStyle.horizontalAlign,
     },
     on: {
       pointerdown: (event) => {
@@ -74,7 +77,9 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
     dataset: { editableId: block.id },
     style: {
       padding: textStyle.hasPadding ? "1mm" : "0",
-      placeItems: getContentPlaceItems(textStyle),
+      justifyContent: getJustifyContent(textStyle.horizontalAlign),
+      alignItems: getAlignItems(textStyle.verticalAlign),
+      textAlign: textStyle.horizontalAlign,
     },
     on: {
       pointerdown: (event) => {
