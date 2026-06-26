@@ -2,10 +2,22 @@ import { BLOCK_TYPES } from "./blockTypes.js";
 
 export const TEXT_BLOCK_DEFAULT_PROPS = {
   text: "Texto",
-  fontFamily: "Arial",
-  fontSizePt: 11,
-  textAlign: "center",
-  verticalAlign: "middle",
+  style: {
+    backgroundColor: "#ffffff",
+    fontFamily: "Arial",
+    fontSizePt: 11,
+    hasBorder: true,
+    borderRadiusMm: 0,
+    layer: 2,
+    bold: false,
+    italic: false,
+    strike: false,
+  },
+  textStyle: {
+    horizontalAlign: "center",
+    verticalAlign: "middle",
+    hasPadding: true,
+  },
 };
 
 export const TEXT_BLOCK_DEFINITION = {
