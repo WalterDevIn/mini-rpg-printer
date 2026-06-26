@@ -9,6 +9,18 @@ export function installEditorEvents({ editorState, controller }) {
     if (isFormInteractionTarget(event.target)) return;
     if (editorState.interaction.editingBlockId) return;
 
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c") {
+      event.preventDefault();
+      controller.copySelectedBlock();
+      return;
+    }
+
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "v") {
+      event.preventDefault();
+      controller.pasteCopiedBlock();
+      return;
+    }
+
     if (event.key === "Delete" || event.key === "Backspace") {
       controller.deleteSelectedBlock();
     }
