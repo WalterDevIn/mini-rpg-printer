@@ -1,5 +1,6 @@
 export const DEFAULT_COMMON_STYLE = {
   backgroundColor: "#ffffff",
+  textColor: "#1f2328",
   fontFamily: "Arial",
   fontSizePt: 11,
   hasBorder: true,
@@ -18,7 +19,7 @@ export const DEFAULT_TEXT_STYLE = {
 
 export const DEFAULT_LINE_STYLE = {
   angleDeg: 0,
-  thicknessMm: 0.5,
+  thicknessMm: 0.75,
 };
 
 export const DEFAULT_RULED_TEXT_STYLE = {
@@ -26,6 +27,9 @@ export const DEFAULT_RULED_TEXT_STYLE = {
   lineVerticalAlign: "middle",
   paddingMm: 1,
   lineHeightMm: 5,
+  showLines: true,
+  lineColor: "#94a3b8",
+  lineOpacity: 0.45,
 };
 
 export const DEFAULT_INTERNAL_GRID_STYLE = {
@@ -78,6 +82,8 @@ export function getRuledTextStyle(block) {
     lineVerticalAlign: normalizeVerticalAlign(nextStyle.lineVerticalAlign),
     paddingMm: normalizePaddingMm(nextStyle, DEFAULT_RULED_TEXT_STYLE.paddingMm),
     lineHeightMm: 5,
+    showLines: nextStyle.showLines !== false,
+    lineOpacity: clampNumber(nextStyle.lineOpacity, 0, 1),
   };
 }
 
