@@ -52,6 +52,21 @@ export function deleteBlock(documentModel, blockId) {
   return true;
 }
 
+export function deleteBlocks(documentModel, blockIds) {
+  const ids = new Set(blockIds);
+  let deleted = false;
+
+  documentModel.spreads.forEach((spread) => {
+    spread.pages.forEach((page) => {
+      const nextBlocks = page.blocks.filter((block) => !ids.has(block.id));
+      deleted = deleted || nextBlocks.length !== page.blocks.length;
+      page.blocks = nextBlocks;
+    });
+  });
+
+  return deleted;
+}
+
 export function moveBlockToPage(documentModel, blockId, targetPageId) {
   const foundBlock = findBlockById(documentModel, blockId);
   const foundTarget = findPageById(documentModel, targetPageId);
@@ -77,6 +92,23 @@ export function updateBlockFrame(documentModel, blockId, nextFrame) {
   return found.block;
 }
 
+export function translateBlocks(documentModel, blockIds, delta) {
+  return blockIds
+    .map((blockId) => {
+      const found = findBlockById(documentModel, blockId);
+      if (!found) return null;
+
+      found.block.frame = constrainFrameToPage({
+        ...found.block.frame,
+        x: found.block.frame.x + delta.x,
+        y: found.block.frame.y + delta.y,
+      }, documentModel.pageSpec, getMinimumFrameSize(found.block));
+
+      return found.block;
+    })
+    .filter(Boolean);
+}
+
 export function updateBlockProps(documentModel, blockId, nextProps) {
   const found = findBlockById(documentModel, blockId);
   if (!found) return null;
@@ -84,6 +116,12 @@ export function updateBlockProps(documentModel, blockId, nextProps) {
   found.block.props = mergePlainObjects(found.block.props, nextProps);
 
   return found.block;
+}
+
+export function updateBlocksProps(documentModel, blockIds, nextProps) {
+  return blockIds
+    .map((blockId) => updateBlockProps(documentModel, blockId, nextProps))
+    .filter(Boolean);
 }
 
 function getMinimumFrameSize(block) {
