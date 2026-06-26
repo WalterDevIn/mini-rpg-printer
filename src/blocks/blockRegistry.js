@@ -1,0 +1,20 @@
+import { BLOCK_TYPES } from "./blockTypes.js";
+import { TEXT_BLOCK_DEFINITION } from "./textBlockDefinition.js";
+
+const BLOCK_DEFINITIONS = {
+  [BLOCK_TYPES.text]: TEXT_BLOCK_DEFINITION,
+};
+
+export function getBlockDefinition(type) {
+  const definition = BLOCK_DEFINITIONS[type];
+
+  if (!definition) {
+    throw new Error(`Unknown block type: ${type}`);
+  }
+
+  return definition;
+}
+
+export function listBlockDefinitions() {
+  return Object.values(BLOCK_DEFINITIONS);
+}
