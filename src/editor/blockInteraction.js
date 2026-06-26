@@ -23,29 +23,92 @@ function getDraggedFrame(event, block, targetPageElement, pointerOffsetMm) {
   };
 }
 
+function setBlockElementFrame(element, frame) {
+  element.style.left = `${frame.x}mm`;
+  element.style.top = `${frame.y}mm`;
+  element.style.width = `${frame.width}mm`;
+  element.style.height = `${frame.height}mm`;
+}
+
+function createDragGhost(sourceElement, event, pointerOffsetPx) {
+  const rect = sourceElement.getBoundingClientRect();
+  const ghost = sourceElement.cloneNode(true);
+
+  ghost.classList.remove("is-selected", "is-editing", "is-dropping");
+  ghost.classList.add("drag-ghost", "is-picking");
+  ghost.style.left = `${event.clientX - pointerOffsetPx.x}px`;
+  ghost.style.top = `${event.clientY - pointerOffsetPx.y}px`;
+  ghost.style.width = `${rect.width}px`;
+  ghost.style.height = `${rect.height}px`;
+
+  ghost.querySelectorAll(".resize-handle").forEach((handle) => handle.remove());
+  document.body.appendChild(ghost);
+
+  window.setTimeout(() => {
+    ghost.classList.remove("is-picking");
+    ghost.classList.add("is-dragging");
+  }, 150);
+
+  return ghost;
+}
+
+function moveGhost(ghost, event, pointerOffsetPx) {
+  ghost.style.left = `${event.clientX - pointerOffsetPx.x}px`;
+  ghost.style.top = `${event.clientY - pointerOffsetPx.y}px`;
+}
+
+function dropGhost(ghost) {
+  if (!ghost) return;
+
+  ghost.classList.remove("is-picking", "is-dragging");
+  ghost.classList.add("is-dropping");
+  window.setTimeout(() => ghost.remove(), 180);
+}
+
 export function handleBlockPointerDown({ event, block, page, pageElement, editorState, controller }) {
   event.stopPropagation();
+  event.preventDefault();
 
+  const blockElement = event.currentTarget;
   const wasSelected = editorState.selection.blockId === block.id;
   const pointerInPage = pointerToPageMm(event, pageElement);
   const pointerOffsetMm = {
     x: pointerInPage.x - block.frame.x,
     y: pointerInPage.y - block.frame.y,
   };
+  const blockRect = blockElement.getBoundingClientRect();
+  const pointerOffsetPx = {
+    x: event.clientX - blockRect.left,
+    y: event.clientY - blockRect.top,
+  };
   const startClient = { x: event.clientX, y: event.clientY };
+
   let moved = false;
   let pickedUp = false;
   let released = false;
   let activePageElement = pageElement;
+  let latestFrame = { ...block.frame };
+  let latestPageId = page.id;
+  let ghost = null;
 
-  function beginPickup(targetPageId = page.id) {
+  function beginPickup(pickupEvent, targetPageId = page.id) {
     if (pickedUp || released) return;
+
     pickedUp = true;
-    controller.beginBlockPickup(block.id, targetPageId);
+    latestPageId = targetPageId;
+    editorState.selection = { blockId: block.id, pageId: targetPageId };
+    editorState.interaction.mode = "dragging-block";
+    editorState.interaction.pickingBlockId = block.id;
+    editorState.interaction.draggingBlockId = block.id;
+    editorState.interaction.droppingBlockId = null;
+    editorState.interaction.contextMenu = null;
+
+    blockElement.classList.add("is-drag-source");
+    ghost = createDragGhost(blockElement, pickupEvent, pointerOffsetPx);
   }
 
   const holdTimer = window.setTimeout(() => {
-    beginPickup(page.id);
+    beginPickup(event, page.id);
   }, HOLD_TO_PICKUP_MS);
 
   controller.commitTextEdit(readEditedText, { shouldRender: false });
@@ -70,11 +133,11 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
     if (!targetPageId) return;
 
     activePageElement = targetPageElement;
+    latestPageId = targetPageId;
+    latestFrame = getDraggedFrame(moveEvent, block, targetPageElement, pointerOffsetMm);
 
-    beginPickup(targetPageId);
-
-    const nextFrame = getDraggedFrame(moveEvent, block, targetPageElement, pointerOffsetMm);
-    controller.moveBlock(block.id, targetPageId, nextFrame);
+    beginPickup(moveEvent, targetPageId);
+    moveGhost(ghost, moveEvent, pointerOffsetPx);
   };
 
   const up = (upEvent) => {
@@ -84,6 +147,8 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
 
+    blockElement.classList.remove("is-drag-source");
+
     if (wasSelected && !moved && !pickedUp) {
       controller.startTextEdit(block.id);
       focusEditable(block.id);
@@ -91,10 +156,18 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
     }
 
     if (pickedUp) {
-      const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
-      const dropPageId = getPageIdFromElement(dropPageElement) ?? editorState.selection.pageId ?? page.id;
-      controller.endBlockDrag(block.id);
-      controller.selectBlock(block.id, dropPageId);
+      if (moved) {
+        const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
+        const dropPageId = getPageIdFromElement(dropPageElement) ?? latestPageId;
+        controller.commitBlockMove(block.id, dropPageId, latestFrame, { shouldRender: false });
+        controller.selectBlock(block.id, dropPageId, { shouldRender: false });
+        dropGhost(ghost);
+        controller.endBlockDrop(block.id);
+        return;
+      }
+
+      dropGhost(ghost);
+      controller.selectBlock(block.id, page.id);
       return;
     }
 
@@ -107,9 +180,12 @@ export function handleBlockPointerDown({ event, block, page, pageElement, editor
 
 export function handleResizePointerDown({ event, block, pageElement, controller }) {
   event.stopPropagation();
+  event.preventDefault();
 
+  const blockElement = event.currentTarget.closest(".block");
   const startPointer = pointerToPageMm(event, pageElement);
   const startFrame = { ...block.frame };
+  let latestFrame = { ...startFrame };
 
   pageElement.setPointerCapture?.(event.pointerId);
 
@@ -118,16 +194,20 @@ export function handleResizePointerDown({ event, block, pageElement, controller 
     const nextWidth = snapMm(startFrame.width + current.x - startPointer.x);
     const nextHeight = snapMm(startFrame.height + current.y - startPointer.y);
 
-    controller.updateBlockFrame(block.id, {
-      width: clamp(nextWidth, PAGE_SPEC.gridMm, PAGE_SPEC.widthMm - block.frame.x),
-      height: clamp(nextHeight, PAGE_SPEC.gridMm, PAGE_SPEC.heightMm - block.frame.y),
-    });
+    latestFrame = {
+      ...startFrame,
+      width: clamp(nextWidth, PAGE_SPEC.gridMm, PAGE_SPEC.widthMm - startFrame.x),
+      height: clamp(nextHeight, PAGE_SPEC.gridMm, PAGE_SPEC.heightMm - startFrame.y),
+    };
+
+    setBlockElementFrame(blockElement, latestFrame);
   };
 
   const up = (upEvent) => {
     safeReleasePointerCapture(pageElement, upEvent.pointerId);
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
+    controller.commitBlockResize(block.id, latestFrame);
   };
 
   window.addEventListener("pointermove", move);
