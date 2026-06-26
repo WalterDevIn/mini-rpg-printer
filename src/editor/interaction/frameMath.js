@@ -1,3 +1,4 @@
+import { BLOCK_TYPES } from "../../blocks/blockTypes.js";
 import { PAGE_SPEC } from "../../document/printSpec.js";
 import { clamp, pointerToPageMm, snapMm } from "../../shared/geometry.js";
 
@@ -21,10 +22,11 @@ export function getPointerOffsetInElementPx(event, element) {
 
 export function getDraggedFrame(event, block, targetPageElement, pointerOffsetMm) {
   const pointerMm = pointerToPageMm(event, targetPageElement);
+  const snapStepMm = getBlockMoveSnapMm(block);
 
   return {
-    x: clamp(snapMm(pointerMm.x - pointerOffsetMm.x), 0, PAGE_SPEC.widthMm - block.frame.width),
-    y: clamp(snapMm(pointerMm.y - pointerOffsetMm.y), 0, PAGE_SPEC.heightMm - block.frame.height),
+    x: clamp(snapMm(pointerMm.x - pointerOffsetMm.x, snapStepMm), 0, PAGE_SPEC.widthMm - block.frame.width),
+    y: clamp(snapMm(pointerMm.y - pointerOffsetMm.y, snapStepMm), 0, PAGE_SPEC.heightMm - block.frame.height),
   };
 }
 
@@ -45,4 +47,9 @@ export function setBlockElementFrame(element, frame) {
   element.style.top = `${frame.y}mm`;
   element.style.width = `${frame.width}mm`;
   element.style.height = `${frame.height}mm`;
+}
+
+function getBlockMoveSnapMm(block) {
+  if (block.type === BLOCK_TYPES.line) return PAGE_SPEC.gridMm / 2;
+  return PAGE_SPEC.gridMm;
 }
