@@ -2,14 +2,17 @@ import { createEditorController } from "../editor/editorController.js";
 import { createEditorState } from "../editor/editorState.js";
 import { installEditorEvents } from "../editor/installEditorEvents.js";
 import { renderEditor, renderEditorError } from "../view/renderEditor.js";
+import { withPreservedViewportScroll } from "./preserveScroll.js";
 
 export function createEditorApp({ rootElement }) {
   const editorState = createEditorState();
   let controller = null;
 
   function render() {
-    rootElement.innerHTML = "";
-    rootElement.appendChild(renderEditor({ editorState, controller }));
+    withPreservedViewportScroll(rootElement, () => {
+      rootElement.innerHTML = "";
+      rootElement.appendChild(renderEditor({ editorState, controller }));
+    });
   }
 
   controller = createEditorController({ editorState, render });
