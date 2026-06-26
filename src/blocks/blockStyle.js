@@ -1,6 +1,7 @@
 export const DEFAULT_COMMON_STYLE = {
   backgroundColor: "#ffffff",
   textColor: "#1f2328",
+  borderColor: "#8b96a5",
   fontFamily: "Arial",
   fontSizePt: 11,
   hasBorder: true,
