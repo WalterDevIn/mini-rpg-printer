@@ -163,5 +163,10 @@ export function createEditorController({ editorState, render }) {
       editorState.viewport.showGrid = !editorState.viewport.showGrid;
       render();
     },
+
+    togglePageMargin() {
+      editorState.viewport.showPageMargin = !editorState.viewport.showPageMargin;
+      render();
+    },
   };
 }
