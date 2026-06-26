@@ -14,6 +14,7 @@ import {
   numberControl,
   section,
   selectControl,
+  textControl,
   toggleButton,
 } from "./propertyControls.js";
 
@@ -45,6 +46,7 @@ export function getBlockDisplayName(block) {
   if (block.type === BLOCK_TYPES.line) return "Línea";
   if (block.type === BLOCK_TYPES.ruledText) return "Texto normal";
   if (block.type === BLOCK_TYPES.gridBlock) return "Cuadrícula";
+  if (block.type === BLOCK_TYPES.image) return "Imagen";
   return block.type;
 }
 
@@ -131,6 +133,10 @@ export function renderSpecificProperties({ block, controller }) {
       renderRuledTextProperties({ block, controller }),
       renderInternalGridProperties({ block, controller }),
     ];
+  }
+
+  if (block.type === BLOCK_TYPES.image) {
+    return renderImageProperties({ block, controller });
   }
 
   return null;
@@ -240,6 +246,37 @@ function renderInternalGridProperties({ block, controller }) {
   ]);
 }
 
+function renderImageProperties({ block, controller }) {
+  const image = {
+    src: "",
+    alt: "Imagen",
+    objectFit: "contain",
+    ...block.props.image,
+  };
+
+  return section("Imagen", [
+    field("URL", textControl({
+      value: image.src,
+      placeholder: "https://...",
+      onChange: (value) => updateImageProps(controller, block, { src: value }),
+    })),
+    field("Alt", textControl({
+      value: image.alt,
+      placeholder: "Descripción",
+      onChange: (value) => updateImageProps(controller, block, { alt: value }),
+    })),
+    field("Ajuste", selectControl({
+      value: image.objectFit,
+      options: [
+        { label: "Contener", value: "contain" },
+        { label: "Cubrir", value: "cover" },
+        { label: "Estirar", value: "fill" },
+      ],
+      onChange: (value) => updateImageProps(controller, block, { objectFit: value }),
+    })),
+  ]);
+}
+
 function updateCommonStyle(controller, block, patch) {
   controller.updateBlockProps(block.id, { style: patch });
 }
@@ -265,4 +302,8 @@ function updateGridColor(controller, block, color) {
     style: { borderColor: color },
     internalGrid: { color },
   });
+}
+
+function updateImageProps(controller, block, patch) {
+  controller.updateBlockProps(block.id, { image: patch });
 }
