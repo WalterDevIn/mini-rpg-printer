@@ -18,11 +18,11 @@ function getBlockClassName({ block, editorState, isSelected, isEditing }) {
   ].filter(Boolean).join(" ");
 }
 
-function getJustifyContent(horizontalAlign) {
+function getJustifyItems(horizontalAlign) {
   const map = {
-    left: "flex-start",
+    left: "start",
     center: "center",
-    right: "flex-end",
+    right: "end",
   };
 
   return map[horizontalAlign] ?? "center";
@@ -30,9 +30,9 @@ function getJustifyContent(horizontalAlign) {
 
 function getAlignItems(verticalAlign) {
   const map = {
-    start: "flex-start",
+    start: "start",
     middle: "center",
-    end: "flex-end",
+    end: "end",
   };
 
   return map[verticalAlign] ?? "center";
@@ -75,7 +75,7 @@ function renderTextBlock({ block, page, pageElement, editorState, controller }) 
     className: "block__content block__content--text",
     style: {
       padding: `${textStyle.paddingMm}mm`,
-      justifyContent: getJustifyContent(textStyle.horizontalAlign),
+      justifyItems: getJustifyItems(textStyle.horizontalAlign),
       alignItems: getAlignItems(textStyle.verticalAlign),
     },
     on: {
