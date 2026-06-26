@@ -1,0 +1,56 @@
+.block__icon-content {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+}
+
+.block__fontawesome-icon {
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ring-margin {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  grid-template-rows: repeat(11, 6mm);
+  gap: 6mm;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.ring-margin--left {
+  right: 3mm;
+}
+
+.ring-margin--right {
+  left: 3mm;
+}
+
+.ring-margin__slot {
+  position: relative;
+  width: 6mm;
+  height: 6mm;
+  border: 1px solid rgba(31, 35, 40, 0.55);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.ring-margin__connector {
+  position: absolute;
+  top: 50%;
+  width: 3mm;
+  height: 1px;
+  background: rgba(31, 35, 40, 0.55);
+  transform: translateY(-50%);
+}
+
+.ring-margin--left .ring-margin__connector {
+  left: 100%;
+}
+
+.ring-margin--right .ring-margin__connector {
+  right: 100%;
+}
