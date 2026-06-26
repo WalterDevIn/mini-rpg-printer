@@ -27,14 +27,20 @@ export function createEditorController({ editorState, render }) {
     if (shouldRender) render();
   }
 
+  function addBlock(type) {
+    const page = getFirstPage(editorState.document);
+    const block = addBlockToPage(editorState.document, page.id, type);
+    editorState.selection = { blockId: block.id, pageId: page.id };
+    editorState.interaction.contextMenu = null;
+    editorState.interaction.editingBlockId = null;
+    render();
+  }
+
   return {
+    addBlock,
+
     addTextBlock() {
-      const page = getFirstPage(editorState.document);
-      const block = addBlockToPage(editorState.document, page.id, BLOCK_TYPES.text);
-      editorState.selection = { blockId: block.id, pageId: page.id };
-      editorState.interaction.contextMenu = null;
-      editorState.interaction.editingBlockId = null;
-      render();
+      addBlock(BLOCK_TYPES.text);
     },
 
     addSpread() {
