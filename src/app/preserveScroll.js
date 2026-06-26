@@ -28,4 +28,8 @@ export function withPreservedViewportScroll(rootElement, renderWork) {
   const scrollState = captureViewportScroll(rootElement);
   renderWork();
   restoreViewportScroll(rootElement, scrollState);
+
+  requestAnimationFrame(() => {
+    restoreViewportScroll(rootElement, scrollState);
+  });
 }
