@@ -9,7 +9,6 @@ import {
 } from "../document/documentCommands.js";
 import { findBlockById, getFirstPage } from "../document/documentQueries.js";
 
-const PICKUP_ANIMATION_MS = 150;
 const DROP_ANIMATION_MS = 180;
 
 export function createEditorController({ editorState, render }) {
@@ -59,10 +58,10 @@ export function createEditorController({ editorState, render }) {
       }
     },
 
-    selectBlock(blockId, pageId) {
+    selectBlock(blockId, pageId, { shouldRender = true } = {}) {
       editorState.selection = { blockId, pageId };
       editorState.interaction.contextMenu = null;
-      render();
+      if (shouldRender) render();
     },
 
     clearSelection(readText) {
@@ -92,34 +91,25 @@ export function createEditorController({ editorState, render }) {
       render();
     },
 
-    beginBlockPickup(blockId, pageId) {
-      editorState.selection = { blockId, pageId };
-      editorState.interaction.mode = "dragging-block";
-      editorState.interaction.pickingBlockId = blockId;
-      editorState.interaction.draggingBlockId = blockId;
-      editorState.interaction.droppingBlockId = null;
-      editorState.interaction.contextMenu = null;
-      render();
-
-      window.setTimeout(() => {
-        if (editorState.interaction.pickingBlockId !== blockId) return;
-        editorState.interaction.pickingBlockId = null;
-        render();
-      }, PICKUP_ANIMATION_MS);
-    },
-
-    moveBlock(blockId, targetPageId, frame) {
+    commitBlockMove(blockId, targetPageId, frame, { shouldRender = true } = {}) {
       const movedBlock = moveBlockToPage(editorState.document, blockId, targetPageId);
       if (!movedBlock) return;
 
       updateDocumentBlockFrame(editorState.document, blockId, frame);
       editorState.selection = { blockId, pageId: targetPageId };
-      editorState.interaction.draggingBlockId = blockId;
-      editorState.interaction.mode = "dragging-block";
-      render();
+      editorState.interaction.mode = "idle";
+      editorState.interaction.pickingBlockId = null;
+      editorState.interaction.draggingBlockId = null;
+      editorState.interaction.contextMenu = null;
+      if (shouldRender) render();
     },
 
-    endBlockDrag(blockId) {
+    commitBlockResize(blockId, frame, { shouldRender = true } = {}) {
+      updateDocumentBlockFrame(editorState.document, blockId, frame);
+      if (shouldRender) render();
+    },
+
+    endBlockDrop(blockId) {
       editorState.interaction.mode = "idle";
       editorState.interaction.pickingBlockId = null;
       editorState.interaction.draggingBlockId = null;
