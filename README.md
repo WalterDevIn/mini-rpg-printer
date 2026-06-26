@@ -12,27 +12,40 @@ npm run dev
 ## Estado actual
 
 - Editor con pares de hojas lado a lado.
-- Cada hoja mide `85mm x 147.5mm`.
+- Cada hoja mide `105mm x 147.5mm`.
 - Cada par nuevo se agrega debajo del anterior.
 - Grilla gris clara de `5mm x 5mm`, originada en la esquina superior izquierda de cada hoja.
+- Toolbar compacta con iconos de Font Awesome.
 - Toggle para mostrar u ocultar la grilla.
 - Bloque inicial disponible: bloque de texto centrado.
 - Los bloques se mueven y redimensionan con snap obligatorio de `5mm`.
-- Doble click sobre un bloque para editar texto.
-- `Delete`, `Supr` o botón `Borrar bloque` para eliminar el bloque seleccionado.
-- Selector de fuente para el bloque seleccionado.
+- Segundo click sobre un bloque ya seleccionado para editar texto.
+- `Enter` confirma la edición.
+- Click fuera u otro bloque cierra la edición actual.
+- Click derecho sobre un bloque abre el menú de fuente.
+- `Delete`, `Supr`, `Backspace` o botón de papelera eliminan el bloque seleccionado.
 
 ## Controles
 
-- `Agregar bloque de texto`: crea un bloque en la primera hoja.
-- `Agregar par de hojas`: agrega dos hojas nuevas debajo.
+- Icono `A`: crea un bloque de texto en la primera hoja.
+- Icono de hojas: agrega dos hojas nuevas debajo.
+- Icono de papelera: borra el bloque seleccionado.
+- Icono de grilla: activa o desactiva la grilla.
 - Click sobre bloque: seleccionar.
+- Segundo click sobre el mismo bloque: editar texto.
 - Arrastrar bloque: moverlo por la hoja.
 - Tirador inferior derecho: redimensionar.
-- Doble click: editar texto.
-- `Ctrl + Enter`: terminar edición.
-- `Escape`: salir de edición.
-- `Delete` / `Supr`: borrar bloque seleccionado.
+- `Enter`: terminar edición.
+- `Escape`: salir de edición o cerrar menú contextual.
+- Click derecho sobre bloque: cambiar fuente.
+
+## Estructura
+
+- `src/main.js`: entry point mínimo.
+- `src/app/boot.js`: arranque.
+- `src/app/render.js`: render global y eventos globales.
+- `src/core/`: constantes, geometría, estado y modelo del documento.
+- `src/ui/`: componentes de toolbar, hojas, bloques, menú contextual y helpers DOM.
 
 ## Próximos pasos razonables
 
