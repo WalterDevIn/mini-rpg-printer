@@ -18,7 +18,7 @@ export function createEditorController({ editorState, render }) {
 
     const text = readText?.(blockId);
     if (typeof text === "string") {
-      updateDocumentBlockProps(editorState.document, blockId, { text: text.trim() || "Texto" });
+      updateDocumentBlockProps(editorState.document, blockId, { text });
     }
 
     editorState.interaction.editingBlockId = null;
