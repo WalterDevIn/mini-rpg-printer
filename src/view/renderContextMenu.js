@@ -139,6 +139,8 @@ export function renderContextMenu({ editorState, controller }) {
     style: getFloatingMenuStyle({ x: menu.x, y: menu.y }),
     on: {
       pointerdown: (event) => event.stopPropagation(),
+      pointerup: (event) => event.stopPropagation(),
+      click: (event) => event.stopPropagation(),
       keydown: (event) => event.stopPropagation(),
       contextmenu: (event) => event.preventDefault(),
     },
