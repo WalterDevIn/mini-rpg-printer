@@ -1,12 +1,17 @@
-import { canEditBlockText } from "../../blocks/blockCapabilities.js";
 import { safeReleasePointerCapture } from "../../shared/geometry.js";
 import { createSelection, getSelectedBlockIds } from "../selectionHelpers.js";
-import { focusEditable, readEditedText } from "../textEditing.js";
-import { createDragGhost, dropDragGhost, moveDragGhost } from "./dragGhost.js";
+import { readEditedText } from "../textEditing.js";
+import { createBlockDragPreview } from "./blockDragPreview.js";
+import {
+  commitMovedBlockDrop,
+  commitPlainSelection,
+  commitUnmovedPickedBlock,
+} from "./dropCommit.js";
+import { createDragSelection, hasPointerMovedPastThreshold } from "./dragIntent.js";
 import { getDraggedFrame, getPointerOffsetInBlockMm, getPointerOffsetInElementPx } from "./frameMath.js";
-import { createGroupDragPreview } from "./groupDragPreview.js";
-import { CLICK_MOVE_THRESHOLD_PX, HOLD_TO_PICKUP_MS } from "./interactionConstants.js";
+import { HOLD_TO_PICKUP_MS } from "./interactionConstants.js";
 import { getPageElementUnderPointer, getPageIdFromElement } from "./pageHitTesting.js";
+import { shouldStartTextEditFromPointerUp, startTextEditFromPointerUp } from "./textEditGesture.js";
 
 export function startBlockDragSession({ event, block, page, pageElement, editorState, controller }) {
   if (event.button !== 0) return;
@@ -15,13 +20,22 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
   event.preventDefault();
 
   const blockElement = event.currentTarget;
-  const selectedIdsAtStart = getSelectedBlockIds(editorState);
-  const isPartOfSelection = selectedIdsAtStart.includes(block.id);
-  const activeSelectionIds = isPartOfSelection ? selectedIdsAtStart : [block.id];
-  const wasSelected = isPartOfSelection;
+  const { activeSelectionIds, wasSelected } = createDragSelection({
+    block,
+    editorState,
+    getSelectedBlockIds,
+  });
   const pointerOffsetMm = getPointerOffsetInBlockMm(event, block, pageElement);
   const pointerOffsetPx = getPointerOffsetInElementPx(event, blockElement);
   const startClient = { x: event.clientX, y: event.clientY };
+  const preview = createBlockDragPreview({
+    block,
+    blockElement,
+    editorState,
+    pageElement,
+    pointerOffsetPx,
+    activeSelectionIds,
+  });
 
   let moved = false;
   let pickedUp = false;
@@ -29,28 +43,13 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
   let activePageElement = pageElement;
   let latestFrame = { ...block.frame };
   let latestPageId = page.id;
-  let ghost = null;
-  let groupPreview = null;
 
   function beginPickup(pickupEvent, targetPageId = page.id) {
     if (pickedUp || released) return;
 
     pickedUp = true;
     latestPageId = targetPageId;
-    editorState.selection = createSelection(activeSelectionIds, targetPageId);
-    editorState.interaction.mode = "dragging-block";
-    editorState.interaction.pickingBlockId = block.id;
-    editorState.interaction.draggingBlockId = block.id;
-    editorState.interaction.droppingBlockId = null;
-    editorState.interaction.contextMenu = null;
-
-    blockElement.classList.add("is-drag-source");
-    ghost = createDragGhost(blockElement, pickupEvent, pointerOffsetPx);
-    groupPreview = createGroupDragPreview({
-      pageElement,
-      blockIds: activeSelectionIds,
-      sourceBlockId: block.id,
-    });
+    preview.begin(pickupEvent, targetPageId);
   }
 
   const holdTimer = window.setTimeout(() => {
@@ -64,10 +63,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
   pageElement.setPointerCapture?.(event.pointerId);
 
   const move = (moveEvent) => {
-    const dxPx = Math.abs(moveEvent.clientX - startClient.x);
-    const dyPx = Math.abs(moveEvent.clientY - startClient.y);
-
-    if (dxPx > CLICK_MOVE_THRESHOLD_PX || dyPx > CLICK_MOVE_THRESHOLD_PX) {
+    if (hasPointerMovedPastThreshold(moveEvent, startClient)) {
       moved = true;
     }
 
@@ -83,8 +79,7 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
     latestFrame = getDraggedFrame(moveEvent, block, targetPageElement, pointerOffsetMm);
 
     beginPickup(moveEvent, targetPageId);
-    moveDragGhost(ghost, moveEvent, pointerOffsetPx);
-    groupPreview?.move({
+    preview.move(moveEvent, {
       x: latestFrame.x - block.frame.x,
       y: latestFrame.y - block.frame.y,
     });
@@ -97,35 +92,38 @@ export function startBlockDragSession({ event, block, page, pageElement, editorS
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", up);
 
-    blockElement.classList.remove("is-drag-source");
+    preview.clearSource();
 
-    if (wasSelected && activeSelectionIds.length === 1 && !moved && !pickedUp && canEditBlockText(block)) {
-      groupPreview?.clear();
-      controller.startTextEdit(block.id);
-      focusEditable(block.id);
+    if (shouldStartTextEditFromPointerUp({ block, wasSelected, activeSelectionIds, moved, pickedUp })) {
+      preview.clearGroup();
+      startTextEditFromPointerUp({ block, controller });
       return;
     }
 
     if (pickedUp) {
+      preview.clearGroup();
+
       if (moved) {
-        const dropPageElement = getPageElementUnderPointer(upEvent, activePageElement);
-        const dropPageId = getPageIdFromElement(dropPageElement) ?? latestPageId;
-        groupPreview?.clear();
-        controller.commitBlockMove(block.id, dropPageId, latestFrame, { shouldRender: false });
-        controller.selectBlocks(activeSelectionIds, dropPageId, { shouldRender: false });
-        dropDragGhost(ghost);
-        controller.endBlockDrop(block.id);
+        commitMovedBlockDrop({
+          event: upEvent,
+          activePageElement,
+          latestPageId,
+          latestFrame,
+          block,
+          activeSelectionIds,
+          controller,
+        });
+        preview.dropGhost();
         return;
       }
 
-      groupPreview?.clear();
-      dropDragGhost(ghost);
-      controller.selectBlocks(activeSelectionIds, page.id);
+      preview.dropGhost();
+      commitUnmovedPickedBlock({ activeSelectionIds, page, controller });
       return;
     }
 
-    groupPreview?.clear();
-    controller.selectBlocks(activeSelectionIds, page.id);
+    preview.clearGroup();
+    commitPlainSelection({ activeSelectionIds, page, controller });
   };
 
   window.addEventListener("pointermove", move);
