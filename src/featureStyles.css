@@ -11,6 +11,62 @@
   pointer-events: none;
 }
 
+.block__content--labeled {
+  position: relative;
+  display: grid;
+}
+
+.labeled-block__placeholder {
+  position: absolute;
+  left: 1.5mm;
+  top: 50%;
+  color: rgba(100, 116, 139, 0.72);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.labeled-block__label {
+  position: absolute;
+  z-index: 1;
+  max-width: calc(100% - 4mm);
+  padding: 0 1mm;
+  color: inherit;
+  background: inherit;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.labeled-block__label--fieldsetTopLeft {
+  left: 2mm;
+  top: -0.48em;
+}
+
+.labeled-block__label--fieldsetTopCenter {
+  left: 50%;
+  top: -0.48em;
+  transform: translateX(-50%);
+}
+
+.labeled-block__label--fieldsetTopRight {
+  right: 2mm;
+  top: -0.48em;
+}
+
+.labeled-block__label--insideTopLeft {
+  left: 1.5mm;
+  top: 1mm;
+}
+
+.labeled-block__label--insideTopRight {
+  right: 1.5mm;
+  top: 1mm;
+}
+
+.labeled-block__label--outsideTopLeft {
+  left: 0;
+  top: -1.5em;
+}
+
 .ring-margin {
   position: absolute;
   top: 50%;
