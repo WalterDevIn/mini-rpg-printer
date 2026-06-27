@@ -32,3 +32,7 @@ export function updateImageProps(controller, patch) {
 export function updateIconProps(controller, patch) {
   controller.updateSelectedBlockProps({ icon: patch });
 }
+
+export function updateLabeledStyle(controller, patch) {
+  controller.updateSelectedBlockProps({ label: patch });
+}
