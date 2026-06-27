@@ -11,7 +11,16 @@ export const DEFAULT_COMMON_STYLE = {
   fontFamily: "Arial",
   fontSizePt: 11,
   hasBorder: true,
+  useFineSnap: false,
   borderRadiusMm: 0,
+  borderTopWidthMm: 0.25,
+  borderRightWidthMm: 0.25,
+  borderBottomWidthMm: 0.25,
+  borderLeftWidthMm: 0.25,
+  borderTopLeftRadiusMm: null,
+  borderTopRightRadiusMm: null,
+  borderBottomRightRadiusMm: null,
+  borderBottomLeftRadiusMm: null,
   layer: 2,
   bold: false,
   italic: false,
@@ -61,6 +70,15 @@ export function getCommonStyle(block) {
     backgroundOpacity: clampNumber(nextStyle.backgroundOpacity, 0, 1, DEFAULT_COMMON_STYLE.backgroundOpacity),
     textOpacity: clampNumber(nextStyle.textOpacity, 0, 1, DEFAULT_COMMON_STYLE.textOpacity),
     borderOpacity: clampNumber(nextStyle.borderOpacity, 0, 1, DEFAULT_COMMON_STYLE.borderOpacity),
+    useFineSnap: nextStyle.useFineSnap === true,
+    borderTopWidthMm: clampNumber(nextStyle.borderTopWidthMm, 0, 20, DEFAULT_COMMON_STYLE.borderTopWidthMm),
+    borderRightWidthMm: clampNumber(nextStyle.borderRightWidthMm, 0, 20, DEFAULT_COMMON_STYLE.borderRightWidthMm),
+    borderBottomWidthMm: clampNumber(nextStyle.borderBottomWidthMm, 0, 20, DEFAULT_COMMON_STYLE.borderBottomWidthMm),
+    borderLeftWidthMm: clampNumber(nextStyle.borderLeftWidthMm, 0, 20, DEFAULT_COMMON_STYLE.borderLeftWidthMm),
+    borderTopLeftRadiusMm: nullableNumber(nextStyle.borderTopLeftRadiusMm),
+    borderTopRightRadiusMm: nullableNumber(nextStyle.borderTopRightRadiusMm),
+    borderBottomRightRadiusMm: nullableNumber(nextStyle.borderBottomRightRadiusMm),
+    borderBottomLeftRadiusMm: nullableNumber(nextStyle.borderBottomLeftRadiusMm),
   };
 }
 
@@ -139,4 +157,8 @@ function normalizePaddingMm(textStyle, defaultValue) {
 function clampNumber(value, min, max, fallback = min) {
   if (typeof value !== "number") return fallback;
   return Math.min(Math.max(value, min), max);
+}
+
+function nullableNumber(value) {
+  return typeof value === "number" ? Math.max(value, 0) : null;
 }
