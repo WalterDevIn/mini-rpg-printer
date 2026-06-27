@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-**Paso actual:** 4 — Completado. También completado después: Paso 3 — Partir `editorController.js` en acciones. Próximo paso recomendado: 5 — Convertir `blockRegistry` en registro rico.
+**Paso actual:** 5 — Completado. Próximo paso recomendado: 6 — Partir `blockDragSession.js` en intent, preview y commit.
 
 **Regla de trabajo:** no avanzar al siguiente paso sin actualizar este archivo. Cada refactor debe mantener el estado actual, los archivos tocados y una nota breve de verificación.
 
@@ -133,22 +133,31 @@ src/document/documentCommands.js
 
 ### Paso 5 — Convertir `blockRegistry` en registro rico
 
-**Estado:** pendiente.
+**Estado:** completado.
 
-**Motivo:** agregar un bloque exige tocar demasiados archivos: tipo, registro, toolbar, dispatcher de render, inspector, capabilities, constraints. El registry debería centralizar metadata.
+**Motivo:** agregar un bloque exigía tocar demasiados archivos: tipo, registro, toolbar, dispatcher de render, inspector, capabilities y constraints.
 
-**Idea objetivo:** cada definición de bloque debería poder exponer:
+**Resultado:** `blockRegistry.js` ahora enriquece cada definición con `capabilities` y `constraints`. `blockCapabilities.js` y `blockConstraints.js` leen desde el registry. La toolbar se genera desde `listBlockDefinitions()`. El render de bloques se simplificó con un registry visual en `src/view/blockRendererRegistry.js`, manteniendo la separación de capas para no hacer que `blocks/` dependa de `view/`.
+
+**Archivos creados:**
 
 ```text
-label
-iconClass
-render
-propertySection
-capabilities
-constraints
+src/view/blockRendererRegistry.js
 ```
 
-**Criterio de finalización:** toolbar, render dispatcher e inspector reducen hardcodeos por tipo.
+**Archivos modificados:**
+
+```text
+src/blocks/blockRegistry.js
+src/blocks/blockCapabilities.js
+src/blocks/blockConstraints.js
+src/view/renderToolbar.js
+src/view/renderBlock.js
+```
+
+**Criterio de finalización:** cumplido parcialmente con separación de capas conservada. Toolbar, capabilities, constraints y render dispatcher redujeron hardcodeos por tipo. Los renderers no se guardan dentro de `blocks/blockRegistry.js` para evitar dependencia `blocks → view`.
+
+**Verificación sugerida:** crear todos los tipos desde la toolbar, editar texto en bloques textuales, redimensionar línea y confirmar render correcto de cada bloque.
 
 ---
 
@@ -261,4 +270,5 @@ src/
 - Paso 2 completado: se agregó `documentTransaction.js` y `editorController.js` centraliza autosave con `mutateDocument(...)`.
 - Paso 4 completado por pedido explícito: se movieron constraints de bloque a `src/blocks/blockConstraints.js`.
 - Paso 3 completado después del Paso 4: `editorController.js` quedó compuesto por acciones bajo `src/editor/actions/`.
-- Próximo paso recomendado: Paso 5 — convertir `blockRegistry` en registro rico.
+- Paso 5 completado: `blockRegistry.js` centraliza capabilities/constraints y la toolbar/render reducen hardcodeos por tipo.
+- Próximo paso recomendado: Paso 6 — partir `blockDragSession.js` en intent, preview y commit.
