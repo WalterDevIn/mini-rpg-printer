@@ -7,7 +7,7 @@ export function createGroupDragPreview({ pageElement, blockIds, sourceBlockId })
 
       const ghost = element.cloneNode(true);
       ghost.classList.remove("is-selected", "is-editing", "is-dropping");
-      ghost.classList.add("is-group-drag-ghost");
+      ghost.classList.add("is-group-drag-ghost", "is-picking");
       ghost.style.left = element.style.left;
       ghost.style.top = element.style.top;
       ghost.style.width = element.style.width;
@@ -16,6 +16,10 @@ export function createGroupDragPreview({ pageElement, blockIds, sourceBlockId })
 
       element.classList.add("is-drag-source");
       pageElement.appendChild(ghost);
+      window.setTimeout(() => {
+        ghost.classList.remove("is-picking");
+        ghost.classList.add("is-dragging");
+      }, 150);
 
       return {
         element,
