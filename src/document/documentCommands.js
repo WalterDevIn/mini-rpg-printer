@@ -80,6 +80,34 @@ export function moveBlockToPage(documentModel, blockId, targetPageId) {
   return foundBlock.block;
 }
 
+export function moveBlocksToPage(documentModel, blockIds, targetPageId) {
+  const foundTarget = findPageById(documentModel, targetPageId);
+  if (!foundTarget) return [];
+
+  const ids = new Set(blockIds);
+  const movedBlocks = [];
+
+  documentModel.spreads.forEach((spread) => {
+    spread.pages.forEach((page) => {
+      const remainingBlocks = [];
+
+      page.blocks.forEach((block) => {
+        if (ids.has(block.id)) {
+          movedBlocks.push(block);
+          return;
+        }
+
+        remainingBlocks.push(block);
+      });
+
+      page.blocks = remainingBlocks;
+    });
+  });
+
+  foundTarget.page.blocks.push(...movedBlocks);
+  return movedBlocks;
+}
+
 export function updateBlockFrame(documentModel, blockId, nextFrame) {
   const found = findBlockById(documentModel, blockId);
   if (!found) return null;
