@@ -3,9 +3,9 @@ import { lineBackgroundToCss } from "./gridCss.js";
 export function commonStyleToCss(commonStyle) {
   return {
     zIndex: String(commonStyle.layer),
-    color: commonStyle.textColor,
-    backgroundColor: commonStyle.backgroundColor,
-    borderColor: commonStyle.borderColor ?? commonStyle.textColor,
+    color: colorWithOpacity(commonStyle.textColor, commonStyle.textOpacity),
+    backgroundColor: colorWithOpacity(commonStyle.backgroundColor, commonStyle.backgroundOpacity),
+    borderColor: colorWithOpacity(commonStyle.borderColor, commonStyle.borderOpacity),
     borderStyle: commonStyle.hasBorder ? "solid" : "none",
     borderRadius: `${commonStyle.borderRadiusMm}mm`,
     fontFamily: commonStyle.fontFamily,
@@ -42,6 +42,26 @@ export function ruledTextStyleToCss(ruledTextStyle) {
     textAlign: ruledTextStyle.horizontalAlign,
     lineHeight: `${ruledTextStyle.lineHeightMm}mm`,
     transform: `translateY(${lineVerticalAlignToTextOffset(ruledTextStyle.lineVerticalAlign)})`,
+  };
+}
+
+function colorWithOpacity(hex, opacity) {
+  const color = hexToRgb(hex);
+  return `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+}
+
+function hexToRgb(hex) {
+  const normalized = String(hex ?? "").replace("#", "");
+  const value = Number.parseInt(normalized.length === 3
+    ? normalized.split("").map((char) => `${char}${char}`).join("")
+    : normalized, 16);
+
+  if (Number.isNaN(value)) return { r: 31, g: 35, b: 40 };
+
+  return {
+    r: (value >> 16) & 255,
+    g: (value >> 8) & 255,
+    b: value & 255,
   };
 }
 
