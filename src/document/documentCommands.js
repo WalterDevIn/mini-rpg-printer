@@ -1,4 +1,4 @@
-import { BLOCK_TYPES } from "../blocks/blockTypes.js";
+import { getMinimumFrameSize } from "../blocks/blockConstraints.js";
 import { constrainFrameToPage } from "../shared/geometry.js";
 import { mergePlainObjects } from "../shared/objectMerge.js";
 import { createBlock, createSpread } from "./documentFactory.js";
@@ -122,12 +122,4 @@ export function updateBlocksProps(documentModel, blockIds, nextProps) {
   return blockIds
     .map((blockId) => updateBlockProps(documentModel, blockId, nextProps))
     .filter(Boolean);
-}
-
-function getMinimumFrameSize(block) {
-  if (block.type === BLOCK_TYPES.line) {
-    return { widthMm: 5, heightMm: 0.5 };
-  }
-
-  return {};
 }
