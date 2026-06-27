@@ -1,11 +1,48 @@
 import { getMinimumFrameSize } from "../blocks/blockConstraints.js";
 import { constrainFrameToPage } from "../shared/geometry.js";
 import { mergePlainObjects } from "../shared/objectMerge.js";
-import { createBlock, createSpread } from "./documentFactory.js";
+import { createBlock, cloneSpread, createSpread, SPREAD_LAYOUTS } from "./documentFactory.js";
 import { findBlockById, findPageById, getFirstPage } from "./documentQueries.js";
 
 export function addSpread(documentModel) {
-  const spread = createSpread();
+  return insertSpreadAfter(documentModel, documentModel.spreads.length - 1);
+}
+
+export function insertSpreadAfter(documentModel, spreadIndex) {
+  const spread = createSpread({ layout: SPREAD_LAYOUTS.pair });
+  documentModel.spreads.splice(spreadIndex + 1, 0, spread);
+  return spread;
+}
+
+export function duplicateSpreadAfter(documentModel, spreadIndex) {
+  const sourceSpread = documentModel.spreads[spreadIndex];
+  if (!sourceSpread) return null;
+
+  const spread = cloneSpread(sourceSpread);
+  documentModel.spreads.splice(spreadIndex + 1, 0, spread);
+  return spread;
+}
+
+export function deleteSpread(documentModel, spreadIndex) {
+  if (documentModel.spreads.length <= 1) return null;
+  const [deletedSpread] = documentModel.spreads.splice(spreadIndex, 1);
+  return deletedSpread ?? null;
+}
+
+export function addFirstSinglePage(documentModel) {
+  const existingIndex = documentModel.spreads.findIndex((spread) => spread.layout === SPREAD_LAYOUTS.singleStart);
+  if (existingIndex >= 0) return documentModel.spreads[existingIndex];
+
+  const spread = createSpread({ layout: SPREAD_LAYOUTS.singleStart });
+  documentModel.spreads.unshift(spread);
+  return spread;
+}
+
+export function addLastSinglePage(documentModel) {
+  const existingIndex = documentModel.spreads.findIndex((spread) => spread.layout === SPREAD_LAYOUTS.singleEnd);
+  if (existingIndex >= 0) return documentModel.spreads[existingIndex];
+
+  const spread = createSpread({ layout: SPREAD_LAYOUTS.singleEnd });
   documentModel.spreads.push(spread);
   return spread;
 }
