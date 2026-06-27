@@ -1,6 +1,7 @@
 import { GRID_BLOCK_DEFINITION } from "./gridBlockDefinition.js";
 import { ICON_BLOCK_DEFINITION } from "./iconBlockDefinition.js";
 import { IMAGE_BLOCK_DEFINITION } from "./imageBlockDefinition.js";
+import { LABELED_BLOCK_DEFINITION } from "./labeledBlockDefinition.js";
 import { LINE_BLOCK_DEFINITION } from "./lineBlockDefinition.js";
 import { RULED_TEXT_BLOCK_DEFINITION } from "./ruledTextBlockDefinition.js";
 import { BLOCK_TYPES } from "./blockTypes.js";
@@ -13,6 +14,7 @@ const BLOCK_CAPABILITIES = {
   [BLOCK_TYPES.gridBlock]: { canEditText: true },
   [BLOCK_TYPES.image]: { canEditText: false },
   [BLOCK_TYPES.icon]: { canEditText: false },
+  [BLOCK_TYPES.labeled]: { canEditText: true },
 };
 
 const BLOCK_CONSTRAINTS = {
@@ -28,6 +30,7 @@ const BASE_BLOCK_DEFINITIONS = {
   [BLOCK_TYPES.gridBlock]: GRID_BLOCK_DEFINITION,
   [BLOCK_TYPES.image]: IMAGE_BLOCK_DEFINITION,
   [BLOCK_TYPES.icon]: ICON_BLOCK_DEFINITION,
+  [BLOCK_TYPES.labeled]: LABELED_BLOCK_DEFINITION,
 };
 
 const BLOCK_DEFINITIONS = Object.fromEntries(
