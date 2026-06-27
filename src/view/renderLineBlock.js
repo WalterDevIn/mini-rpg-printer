@@ -11,7 +11,7 @@ export function renderLineBlock({ block, page, pageElement, editorState, control
     className: "block__line",
     style: {
       height: `${lineStyle.thicknessMm}mm`,
-      backgroundColor: resolvedCommonCss.backgroundColor,
+      backgroundColor: resolvedCommonCss.color,
     },
   });
 
