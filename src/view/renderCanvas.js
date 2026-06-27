@@ -1,5 +1,4 @@
-import { startMarqueeSelectionSession } from "../editor/interaction/marqueeSelectionSession.js";
-import { readEditedText } from "../editor/textEditing.js";
+import { createPagePointerHandlers } from "../editor/interaction/pagePointerHandlers.js";
 import { el } from "../shared/dom.js";
 import { renderBlock } from "./renderBlock.js";
 import { renderRingMargin } from "./renderRingMargin.js";
@@ -38,22 +37,11 @@ function renderPage({ page, pageNumber, pageSide, editorState, controller }) {
       backgroundColor: pageSpec.background,
       backgroundSize: editorState.viewport.showGrid ? `${pageSpec.gridMm}mm ${pageSpec.gridMm}mm` : undefined,
     },
-    on: {
-      pointerdown: (event) => {
-        if (event.target.closest?.(".block, .resize-handle, .context-menu")) return;
-
-        if (event.button === 2) {
-          startMarqueeSelectionSession({ event, page, pageElement, editorState, controller });
-          return;
-        }
-
-        controller.clearSelection(readEditedText);
-      },
-      contextmenu: (event) => {
-        event.preventDefault();
-      },
-    },
   });
+  const handlers = createPagePointerHandlers({ page, pageElement, editorState, controller });
+
+  pageElement.addEventListener("pointerdown", handlers.pointerdown);
+  pageElement.addEventListener("contextmenu", handlers.contextmenu);
 
   if (editorState.viewport.showPageMargin) {
     pageElement.appendChild(renderRingMargin({ pageSide }));
