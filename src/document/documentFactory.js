@@ -2,21 +2,40 @@ import { getBlockDefinition } from "../blocks/blockRegistry.js";
 import { createId } from "../shared/createId.js";
 import { PAGE_SPEC, PRINT_DOCUMENT_VERSION, PRINT_INTENT } from "./printSpec.js";
 
-export function createPage() {
+export const SPREAD_LAYOUTS = {
+  singleStart: "single-start",
+  pair: "pair",
+  singleEnd: "single-end",
+};
+
+export function createPage(overrides = {}) {
   return {
     id: createId("page"),
     blocks: [],
+    ...overrides,
   };
 }
 
-export function createSpread() {
-  const pages = [createPage(), createPage()];
+export function createSpread({ layout = SPREAD_LAYOUTS.pair, pages = null } = {}) {
+  const spreadPages = pages ?? createPagesForLayout(layout);
 
   return {
     id: createId("spread"),
-    pageIds: pages.map((page) => page.id),
-    pages,
+    layout,
+    pageIds: spreadPages.map((page) => page.id),
+    pages: spreadPages,
   };
+}
+
+export function cloneSpread(sourceSpread) {
+  const pages = sourceSpread.pages.map((page) => createPage({
+    blocks: page.blocks.map(cloneBlock),
+  }));
+
+  return createSpread({
+    layout: sourceSpread.layout ?? SPREAD_LAYOUTS.pair,
+    pages,
+  });
 }
 
 export function createBlock(type, overrides = {}) {
@@ -36,6 +55,15 @@ export function createBlock(type, overrides = {}) {
   };
 }
 
+export function cloneBlock(sourceBlock) {
+  return {
+    id: createId("block"),
+    type: sourceBlock.type,
+    frame: structuredClone(sourceBlock.frame),
+    props: structuredClone(sourceBlock.props),
+  };
+}
+
 export function createPrintDocument({ pageSpec = PAGE_SPEC } = {}) {
   return {
     version: PRINT_DOCUMENT_VERSION,
@@ -46,4 +74,12 @@ export function createPrintDocument({ pageSpec = PAGE_SPEC } = {}) {
     pageSpec,
     spreads: [createSpread()],
   };
+}
+
+function createPagesForLayout(layout) {
+  if (layout === SPREAD_LAYOUTS.singleStart || layout === SPREAD_LAYOUTS.singleEnd) {
+    return [createPage()];
+  }
+
+  return [createPage(), createPage()];
 }
