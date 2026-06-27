@@ -59,13 +59,25 @@ export function renderCommonProperties({ block, controller }) {
       value: style.backgroundColor,
       onChange: (value) => updateCommonStyle(controller, { backgroundColor: value }),
     })),
+    field("Opacidad fondo", opacityControl({
+      value: style.backgroundOpacity,
+      onChange: (value) => updateCommonStyle(controller, { backgroundOpacity: value }),
+    })),
     field("Texto", colorControl({
       value: style.textColor,
       onChange: (value) => updateCommonStyle(controller, { textColor: value }),
     })),
+    field("Opacidad texto", opacityControl({
+      value: style.textOpacity,
+      onChange: (value) => updateCommonStyle(controller, { textOpacity: value }),
+    })),
     field("Borde color", colorControl({
       value: style.borderColor ?? style.textColor,
       onChange: (value) => updateCommonStyle(controller, { borderColor: value }),
+    })),
+    field("Opacidad borde", opacityControl({
+      value: style.borderOpacity,
+      onChange: (value) => updateCommonStyle(controller, { borderOpacity: value }),
     })),
     field("Fuente", selectControl({
       value: style.fontFamily,
@@ -208,11 +220,8 @@ function renderRuledTextProperties({ block, controller }) {
       value: ruledTextStyle.lineColor,
       onChange: (value) => updateRuledTextStyle(controller, { lineColor: value }),
     })),
-    field("Opacidad líneas", numberControl({
+    field("Opacidad líneas", opacityControl({
       value: ruledTextStyle.lineOpacity,
-      min: 0,
-      max: 1,
-      step: 0.05,
       onChange: (value) => updateRuledTextStyle(controller, { lineOpacity: value }),
     })),
   ]);
@@ -226,18 +235,22 @@ function renderInternalGridProperties({ block, controller }) {
       value: gridStyle.color,
       onChange: (value) => updateGridColor(controller, value),
     })),
-    field("Opacidad", numberControl({
+    field("Opacidad", opacityControl({
       value: gridStyle.opacity,
-      min: 0,
-      max: 1,
-      step: 0.05,
       onChange: (value) => updateInternalGridStyle(controller, { opacity: value }),
     })),
   ]);
 }
 
 function renderImageProperties({ block, controller }) {
-  const image = { src: "", alt: "Imagen", objectFit: "contain", ...block.props.image };
+  const image = {
+    src: "",
+    alt: "Imagen",
+    objectFit: "contain",
+    gradientEnabled: false,
+    gradientCss: "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%)",
+    ...block.props.image,
+  };
 
   return section("Imagen", [
     field("URL", textControl({
@@ -259,6 +272,15 @@ function renderImageProperties({ block, controller }) {
       ],
       onChange: (value) => updateImageProps(controller, { objectFit: value }),
     })),
+    field("Gradient", checkboxControl({
+      checked: image.gradientEnabled,
+      onChange: (value) => updateImageProps(controller, { gradientEnabled: value }),
+    })),
+    field("Linear gradient", textControl({
+      value: image.gradientCss,
+      placeholder: "linear-gradient(...)  ",
+      onChange: (value) => updateImageProps(controller, { gradientCss: value }),
+    })),
   ]);
 }
 
@@ -272,6 +294,16 @@ function renderIconProperties({ block, controller }) {
       onChange: (value) => updateIconProps(controller, { className: value }),
     })),
   ]);
+}
+
+function opacityControl({ value, onChange }) {
+  return numberControl({
+    value,
+    min: 0,
+    max: 1,
+    step: 0.05,
+    onChange,
+  });
 }
 
 function updateCommonStyle(controller, patch) {
