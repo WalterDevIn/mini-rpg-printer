@@ -11,21 +11,24 @@ import {
   updateBlocksProps as updateDocumentBlocksProps,
 } from "../document/documentCommands.js";
 import { findBlockById, getFirstPage } from "../document/documentQueries.js";
-import { saveStoredDocument } from "../document/documentStorage.js";
+import { commitDocumentChange } from "../document/documentTransaction.js";
 import { updateEditorSettings } from "../settings/editorSettingsStorage.js";
 import { createSelection, getSelectedBlockIds } from "./selectionHelpers.js";
 
 const DROP_ANIMATION_MS = 180;
 
 export function createEditorController({ editorState, render }) {
+  function mutateDocument(mutation) {
+    return commitDocumentChange(editorState, mutation);
+  }
+
   function commitTextEdit(readText, { shouldRender = true } = {}) {
     const blockId = editorState.interaction.editingBlockId;
     if (!blockId) return;
 
     const text = readText?.(blockId);
     if (typeof text === "string") {
-      updateDocumentBlockProps(editorState.document, blockId, { text });
-      saveDocument();
+      mutateDocument((documentModel) => updateDocumentBlockProps(documentModel, blockId, { text }));
     }
 
     editorState.interaction.editingBlockId = null;
@@ -36,16 +39,11 @@ export function createEditorController({ editorState, render }) {
 
   function addBlock(type) {
     const page = getFirstPage(editorState.document);
-    const block = addBlockToPage(editorState.document, page.id, type);
+    const block = mutateDocument((documentModel) => addBlockToPage(documentModel, page.id, type));
     editorState.selection = createSelection([block.id], page.id);
     editorState.interaction.contextMenu = null;
     editorState.interaction.editingBlockId = null;
-    saveDocument();
     render();
-  }
-
-  function saveDocument() {
-    saveStoredDocument(editorState.document);
   }
 
   return {
@@ -56,9 +54,8 @@ export function createEditorController({ editorState, render }) {
     },
 
     addSpread() {
-      addSpreadToDocument(editorState.document);
+      mutateDocument((documentModel) => addSpreadToDocument(documentModel));
       editorState.interaction.contextMenu = null;
-      saveDocument();
       render();
     },
 
@@ -66,14 +63,14 @@ export function createEditorController({ editorState, render }) {
       const blockIds = getSelectedBlockIds(editorState);
       if (blockIds.length === 0) return;
 
-      if (deleteBlocks(editorState.document, blockIds)) {
+      const deleted = mutateDocument((documentModel) => deleteBlocks(documentModel, blockIds));
+      if (deleted) {
         editorState.selection = createSelection([]);
         editorState.interaction.editingBlockId = null;
         editorState.interaction.pickingBlockId = null;
         editorState.interaction.draggingBlockId = null;
         editorState.interaction.droppingBlockId = null;
         editorState.interaction.contextMenu = null;
-        saveDocument();
         render();
       }
     },
@@ -90,14 +87,13 @@ export function createEditorController({ editorState, render }) {
       if (!copiedBlock) return;
 
       const targetPageId = editorState.selection.pageId ?? getFirstPage(editorState.document)?.id;
-      const block = cloneBlockToPage(editorState.document, copiedBlock, targetPageId);
+      const block = mutateDocument((documentModel) => cloneBlockToPage(documentModel, copiedBlock, targetPageId));
       if (!block) return;
 
       editorState.selection = createSelection([block.id], targetPageId);
       editorState.interaction.contextMenu = null;
       editorState.interaction.editingBlockId = null;
       editorState.clipboard.block = structuredClone(block);
-      saveDocument();
       render();
     },
 
@@ -152,13 +148,18 @@ export function createEditorController({ editorState, render }) {
           x: frame.x - found.block.frame.x,
           y: frame.y - found.block.frame.y,
         };
-        translateBlocks(editorState.document, selectedIds, delta);
+        mutateDocument((documentModel) => translateBlocks(documentModel, selectedIds, delta));
         editorState.selection = createSelection(selectedIds, found.page.id);
       } else {
-        const movedBlock = moveBlockToPage(editorState.document, blockId, targetPageId);
+        const movedBlock = mutateDocument((documentModel) => {
+          const nextBlock = moveBlockToPage(documentModel, blockId, targetPageId);
+          if (!nextBlock) return null;
+
+          updateDocumentBlockFrame(documentModel, blockId, frame);
+          return nextBlock;
+        });
         if (!movedBlock) return;
 
-        updateDocumentBlockFrame(editorState.document, blockId, frame);
         editorState.selection = createSelection([blockId], targetPageId);
       }
 
@@ -166,13 +167,11 @@ export function createEditorController({ editorState, render }) {
       editorState.interaction.pickingBlockId = null;
       editorState.interaction.draggingBlockId = null;
       editorState.interaction.contextMenu = null;
-      saveDocument();
       if (shouldRender) render();
     },
 
     commitBlockResize(blockId, frame, { shouldRender = true } = {}) {
-      updateDocumentBlockFrame(editorState.document, blockId, frame);
-      saveDocument();
+      mutateDocument((documentModel) => updateDocumentBlockFrame(documentModel, blockId, frame));
       if (shouldRender) render();
     },
 
@@ -191,14 +190,12 @@ export function createEditorController({ editorState, render }) {
     },
 
     updateBlockFrame(blockId, frame) {
-      updateDocumentBlockFrame(editorState.document, blockId, frame);
-      saveDocument();
+      mutateDocument((documentModel) => updateDocumentBlockFrame(documentModel, blockId, frame));
       render();
     },
 
     updateBlockProps(blockId, props) {
-      updateDocumentBlockProps(editorState.document, blockId, props);
-      saveDocument();
+      mutateDocument((documentModel) => updateDocumentBlockProps(documentModel, blockId, props));
       render();
     },
 
@@ -206,20 +203,21 @@ export function createEditorController({ editorState, render }) {
       const blockIds = getSelectedBlockIds(editorState);
       if (blockIds.length === 0) return;
 
-      updateDocumentBlocksProps(editorState.document, blockIds, props);
-      saveDocument();
+      mutateDocument((documentModel) => updateDocumentBlocksProps(documentModel, blockIds, props));
       render();
     },
 
     updatePageSize(patch) {
       const nextSettings = updateEditorSettings({ pageSpec: patch });
       editorState.settings = nextSettings;
-      editorState.document.pageSpec = nextSettings.pageSpec;
-      editorState.document.intent = {
-        ...editorState.document.intent,
-        snapUnitMm: nextSettings.pageSpec.gridMm,
-      };
-      saveDocument();
+      mutateDocument((documentModel) => {
+        documentModel.pageSpec = nextSettings.pageSpec;
+        documentModel.intent = {
+          ...documentModel.intent,
+          snapUnitMm: nextSettings.pageSpec.gridMm,
+        };
+        return documentModel;
+      });
       render();
     },
 
