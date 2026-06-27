@@ -1,11 +1,30 @@
 import { lineBackgroundToCss } from "./gridCss.js";
 
-export function commonStyleToCss(commonStyle) {
+export function commonStyleToCss(commonStyle, globalColors = []) {
+  const background = resolveColorToken({
+    colorId: commonStyle.backgroundColorId,
+    fallbackColor: commonStyle.backgroundColor,
+    fallbackOpacity: commonStyle.backgroundOpacity,
+    globalColors,
+  });
+  const text = resolveColorToken({
+    colorId: commonStyle.textColorId,
+    fallbackColor: commonStyle.textColor,
+    fallbackOpacity: commonStyle.textOpacity,
+    globalColors,
+  });
+  const border = resolveColorToken({
+    colorId: commonStyle.borderColorId,
+    fallbackColor: commonStyle.borderColor,
+    fallbackOpacity: commonStyle.borderOpacity,
+    globalColors,
+  });
+
   return {
     zIndex: String(commonStyle.layer),
-    color: colorWithOpacity(commonStyle.textColor, commonStyle.textOpacity),
-    backgroundColor: colorWithOpacity(commonStyle.backgroundColor, commonStyle.backgroundOpacity),
-    borderColor: colorWithOpacity(commonStyle.borderColor, commonStyle.borderOpacity),
+    color: colorWithOpacity(text.hex, text.opacity),
+    backgroundColor: colorWithOpacity(background.hex, background.opacity),
+    borderColor: colorWithOpacity(border.hex, border.opacity),
     borderStyle: commonStyle.hasBorder ? "solid" : "none",
     borderRadius: `${commonStyle.borderRadiusMm}mm`,
     fontFamily: commonStyle.fontFamily,
@@ -42,6 +61,21 @@ export function ruledTextStyleToCss(ruledTextStyle) {
     textAlign: ruledTextStyle.horizontalAlign,
     lineHeight: `${ruledTextStyle.lineHeightMm}mm`,
     transform: `translateY(${lineVerticalAlignToTextOffset(ruledTextStyle.lineVerticalAlign)})`,
+  };
+}
+
+function resolveColorToken({ colorId, fallbackColor, fallbackOpacity, globalColors }) {
+  const globalColor = globalColors.find((color) => color.id === colorId);
+  if (globalColor) {
+    return {
+      hex: globalColor.hex,
+      opacity: globalColor.opacity,
+    };
+  }
+
+  return {
+    hex: fallbackColor,
+    opacity: fallbackOpacity,
   };
 }
 
