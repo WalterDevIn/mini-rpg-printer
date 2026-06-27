@@ -1,5 +1,6 @@
+import { SPREAD_LAYOUTS } from "../document/documentFactory.js";
 import { createPagePointerHandlers } from "../editor/interaction/pagePointerHandlers.js";
-import { el } from "../shared/dom.js";
+import { el, iconButton } from "../shared/dom.js";
 import { renderBlock } from "./renderBlock.js";
 import { renderRingMargin } from "./renderRingMargin.js";
 
@@ -9,21 +10,53 @@ export function renderCanvas({ editorState, controller }) {
 
   let pageNumber = 1;
 
-  editorState.document.spreads.forEach((spread) => {
-    const spreadElement = el("div", { className: "spread" });
-
-    spread.pages.forEach((page, pageIndex) => {
-      const pageSide = pageIndex === 0 ? "left" : "right";
-      const pageElement = renderPage({ page, pageNumber, pageSide, editorState, controller });
-      spreadElement.appendChild(pageElement);
-      pageNumber += 1;
-    });
-
+  editorState.document.spreads.forEach((spread, spreadIndex) => {
+    const spreadElement = renderSpread({ spread, spreadIndex, pageNumber, editorState, controller });
+    pageNumber += spread.pages.length;
     spreadsElement.appendChild(spreadElement);
   });
 
   viewport.appendChild(spreadsElement);
   return viewport;
+}
+
+function renderSpread({ spread, spreadIndex, pageNumber, editorState, controller }) {
+  const spreadElement = el("div", {
+    className: `spread spread--${spread.layout ?? SPREAD_LAYOUTS.pair}`,
+  });
+  const controls = renderSpreadControls({ spread, spreadIndex, controller });
+  const pagesElement = el("div", { className: "spread__pages" });
+
+  spread.pages.forEach((page, pageIndex) => {
+    const pageSide = getPageSide({ spread, pageIndex });
+    const pageElement = renderPage({ page, pageNumber: pageNumber + pageIndex, pageSide, editorState, controller });
+    pagesElement.appendChild(pageElement);
+  });
+
+  spreadElement.appendChild(controls);
+  spreadElement.appendChild(pagesElement);
+  return spreadElement;
+}
+
+function renderSpreadControls({ spread, spreadIndex, controller }) {
+  return el("div", { className: "spread__controls" }, [
+    el("span", { className: "spread__kind", textContent: getSpreadLabel(spread) }),
+    spread.layout === SPREAD_LAYOUTS.pair ? iconButton({
+      iconClass: "fa-regular fa-copy",
+      label: "Duplicar par debajo",
+      onClick: () => controller.duplicateSpread(spreadIndex),
+    }) : null,
+    spread.layout === SPREAD_LAYOUTS.pair ? iconButton({
+      iconClass: "fa-solid fa-plus",
+      label: "Agregar par debajo",
+      onClick: () => controller.insertSpreadAfter(spreadIndex),
+    }) : null,
+    iconButton({
+      iconClass: "fa-regular fa-trash-can",
+      label: "Eliminar par/página",
+      onClick: () => controller.deleteSpread(spreadIndex),
+    }),
+  ]);
 }
 
 function renderPage({ page, pageNumber, pageSide, editorState, controller }) {
@@ -57,4 +90,16 @@ function renderPage({ page, pageNumber, pageSide, editorState, controller }) {
   }));
 
   return pageElement;
+}
+
+function getPageSide({ spread, pageIndex }) {
+  if (spread.layout === SPREAD_LAYOUTS.singleStart) return "right";
+  if (spread.layout === SPREAD_LAYOUTS.singleEnd) return "left";
+  return pageIndex === 0 ? "left" : "right";
+}
+
+function getSpreadLabel(spread) {
+  if (spread.layout === SPREAD_LAYOUTS.singleStart) return "Inicio · página derecha";
+  if (spread.layout === SPREAD_LAYOUTS.singleEnd) return "Final · página izquierda";
+  return "Par de páginas";
 }
