@@ -67,9 +67,17 @@
 .is-group-drag-ghost {
   z-index: 999;
   pointer-events: none;
-  box-shadow: 0 18px 36px rgba(18, 24, 31, 0.22);
-  transform: translateY(-2px) scale(1.01);
-  opacity: 0.92;
+  transform-origin: center;
+}
+
+.is-group-drag-ghost.is-picking {
+  animation: block-pick-up 150ms ease-out forwards;
+}
+
+.is-group-drag-ghost.is-dragging {
+  box-shadow: 0 18px 36px rgba(18, 24, 31, 0.28);
+  transform: translateY(-7px) rotate(-2deg) scale(1.015);
+  opacity: 0.96;
 }
 
 .settings-panel {
