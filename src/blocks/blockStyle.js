@@ -36,8 +36,10 @@ export const DEFAULT_TEXT_STYLE = {
 };
 
 export const DEFAULT_LINE_STYLE = {
-  angleDeg: 0,
+  start: { x: 0, y: 1 },
+  end: { x: 40, y: 1 },
   thicknessMm: 0.75,
+  useMillimeterSnap: false,
 };
 
 export const DEFAULT_RULED_TEXT_STYLE = {
@@ -104,9 +106,22 @@ export function getTextStyle(block) {
 }
 
 export function getLineStyle(block) {
-  return {
+  const legacyAngleDeg = block.props.line?.angleDeg ?? DEFAULT_LINE_STYLE.angleDeg;
+  const legacyStart = { x: 0, y: block.frame.height / 2 };
+  const legacyEnd = getLegacyLineEnd(block, legacyAngleDeg);
+  const nextStyle = {
     ...DEFAULT_LINE_STYLE,
     ...block.props.line,
+    start: block.props.line?.start ?? legacyStart,
+    end: block.props.line?.end ?? legacyEnd,
+  };
+
+  return {
+    ...nextStyle,
+    start: normalizeLinePoint(nextStyle.start, DEFAULT_LINE_STYLE.start),
+    end: normalizeLinePoint(nextStyle.end, DEFAULT_LINE_STYLE.end),
+    thicknessMm: clampNumber(nextStyle.thicknessMm, 0.1, 20, DEFAULT_LINE_STYLE.thicknessMm),
+    useMillimeterSnap: nextStyle.useMillimeterSnap === true,
   };
 }
 
@@ -137,6 +152,18 @@ export function getInternalGridStyle(block) {
     ...nextStyle,
     opacity: clampNumber(nextStyle.opacity, 0, 1, DEFAULT_INTERNAL_GRID_STYLE.opacity),
     sizeMm: 5,
+  };
+}
+
+function getLegacyLineEnd(block, angleDeg) {
+  if (angleDeg === 90) return { x: block.frame.width / 2, y: block.frame.height };
+  return { x: block.frame.width, y: block.frame.height / 2 };
+}
+
+function normalizeLinePoint(point, fallback) {
+  return {
+    x: typeof point?.x === "number" ? point.x : fallback.x,
+    y: typeof point?.y === "number" ? point.y : fallback.y,
   };
 }
 
