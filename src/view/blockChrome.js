@@ -14,7 +14,7 @@ export function createBlockElement({ block, page, pageElement, editorState, cont
     dataset: { blockId: block.id },
     style: {
       ...frameToCss(block.frame),
-      ...commonStyleToCss(commonStyle),
+      ...commonStyleToCss(commonStyle, editorState.globalColors),
       ...style,
     },
     on: {
