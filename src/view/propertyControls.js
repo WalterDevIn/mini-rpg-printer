@@ -4,8 +4,8 @@ function stopEditorShortcut(event) {
   event.stopPropagation();
 }
 
-export function field(label, control) {
-  return el("label", { className: "property-field" }, [
+export function field(label, control, { className = "" } = {}) {
+  return el("label", { className: `property-field${className ? ` ${className}` : ""}` }, [
     el("span", { className: "property-field__label", textContent: label }),
     control,
   ]);
@@ -59,6 +59,16 @@ export function numberControl({ value, min, max, step = 1, onChange }) {
   });
 }
 
+export function opacityControl({ value, onChange }) {
+  return numberControl({
+    value,
+    min: 0,
+    max: 1,
+    step: 0.05,
+    onChange,
+  });
+}
+
 export function colorControl({ value, onChange }) {
   return el("input", {
     className: "property-control property-control--color",
@@ -67,8 +77,19 @@ export function colorControl({ value, onChange }) {
     on: {
       keydown: stopEditorShortcut,
       change: (event) => onChange(event.target.value),
+      input: (event) => onChange(event.target.value),
     },
   });
+}
+
+export function colorOpacityControl({ color, opacity, onColorChange, onOpacityChange }) {
+  return el("div", { className: "property-color-row" }, [
+    colorControl({ value: color, onChange: onColorChange }),
+    el("div", { className: "property-opacity" }, [
+      opacityControl({ value: opacity, onChange: onOpacityChange }),
+      el("span", { className: "property-opacity__suffix", textContent: "α" }),
+    ]),
+  ]);
 }
 
 export function checkboxControl({ checked, onChange }) {
@@ -103,6 +124,6 @@ export function buttonGroup(children) {
 export function section(title, children) {
   return el("section", { className: "property-section" }, [
     el("div", { className: "property-section__title", textContent: title }),
-    ...children,
+    el("div", { className: "property-section__body" }, children),
   ]);
 }
