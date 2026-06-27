@@ -8,18 +8,18 @@ import { BLOCK_TYPES } from "./blockTypes.js";
 import { TEXT_BLOCK_DEFINITION } from "./textBlockDefinition.js";
 
 const BLOCK_CAPABILITIES = {
-  [BLOCK_TYPES.text]: { canEditText: true },
-  [BLOCK_TYPES.line]: { canEditText: false },
-  [BLOCK_TYPES.ruledText]: { canEditText: true },
-  [BLOCK_TYPES.gridBlock]: { canEditText: true },
-  [BLOCK_TYPES.image]: { canEditText: false },
-  [BLOCK_TYPES.icon]: { canEditText: false },
-  [BLOCK_TYPES.labeled]: { canEditText: true },
+  [BLOCK_TYPES.text]: { canEditText: true, canResize: true },
+  [BLOCK_TYPES.line]: { canEditText: false, canResize: false },
+  [BLOCK_TYPES.ruledText]: { canEditText: true, canResize: true },
+  [BLOCK_TYPES.gridBlock]: { canEditText: true, canResize: true },
+  [BLOCK_TYPES.image]: { canEditText: false, canResize: true },
+  [BLOCK_TYPES.icon]: { canEditText: false, canResize: true },
+  [BLOCK_TYPES.labeled]: { canEditText: true, canResize: true },
 };
 
 const BLOCK_CONSTRAINTS = {
   [BLOCK_TYPES.line]: {
-    minFrame: { widthMm: 5, heightMm: 0.5 },
+    minFrame: { widthMm: 1, heightMm: 1 },
   },
 };
 
