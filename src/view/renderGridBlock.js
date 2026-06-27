@@ -14,7 +14,7 @@ export function renderGridBlock({ block, page, pageElement, editorState, control
   const content = el("div", {
     className: "block__content block__content--ruled-text block__content--grid-block",
     style: {
-      ...ruledTextContainerStyleToCss(ruledTextStyle),
+      ...ruledTextContainerStyleToCss({ ...ruledTextStyle, showLines: false }),
       ...gridBackgroundToCss(gridStyle),
     },
     on: {
@@ -38,10 +38,7 @@ export function renderGridBlock({ block, page, pageElement, editorState, control
     pageElement,
     editorState,
     controller,
-    commonStyle: {
-      ...commonStyle,
-      borderColor: gridStyle.color,
-    },
+    commonStyle,
     children: [content],
   });
 }
