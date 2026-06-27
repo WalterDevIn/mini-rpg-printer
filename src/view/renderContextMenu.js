@@ -1,7 +1,12 @@
 import { findBlockById } from "../document/documentQueries.js";
 import { getSelectedBlocks } from "../editor/selectionHelpers.js";
 import { el } from "../shared/dom.js";
-import { getBlockDisplayName, renderCommonProperties, renderSpecificProperties } from "./blockPropertySections.js";
+import {
+  getBlockDisplayName,
+  renderCommonProperties,
+  renderSpecificProperties,
+  renderTypographyProperties,
+} from "./blockPropertySections.js";
 import { getFloatingMenuStyle } from "./floatingMenuPosition.js";
 
 export function renderContextMenu({ editorState, controller }) {
@@ -24,7 +29,7 @@ export function renderContextMenu({ editorState, controller }) {
 
   return el("div", {
     className: "context-menu property-menu",
-    style: getFloatingMenuStyle({ x: menu.x, y: menu.y }),
+    style: getFloatingMenuStyle({ x: menu.x, y: menu.y, width: 300 }),
     on: {
       pointerdown: (event) => event.stopPropagation(),
       pointerup: (event) => event.stopPropagation(),
@@ -35,6 +40,7 @@ export function renderContextMenu({ editorState, controller }) {
   }, [
     el("div", { className: "context-menu__title", textContent: title }),
     renderCommonProperties({ block: primaryBlock, controller }),
+    renderTypographyProperties({ block: primaryBlock, controller }),
     sameType ? renderSpecificProperties({ block: primaryBlock, controller }) : null,
   ]);
 }
