@@ -106,7 +106,12 @@ function renderGlobalColorManager({ editorState, controller }) {
         placeholder: "Nombre",
         onChange: (value) => controller.updateGlobalColor(color.id, { name: value }),
       })),
-      field("Hex/α", colorOpacityControl({
+      field("Código hex", textControl({
+        value: color.hex,
+        placeholder: "#2563eb",
+        onChange: (value) => controller.updateGlobalColor(color.id, { hex: value }),
+      })),
+      field("Color/α", colorOpacityControl({
         color: color.hex,
         opacity: color.opacity,
         onColorChange: (value) => controller.updateGlobalColor(color.id, { hex: value }),
