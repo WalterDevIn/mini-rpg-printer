@@ -1,4 +1,5 @@
 import {
+  colorOpacityControl,
   field,
   numberControl,
   section,
@@ -22,6 +23,11 @@ export function renderLabeledSection({ block, controller }) {
     text: block.props.label?.text ?? "Etiqueta",
     position: block.props.label?.position ?? "fieldsetTopLeft",
     fontSizePt: block.props.label?.fontSizePt ?? 8,
+    backgroundColor: block.props.label?.backgroundColor ?? "#ffffff",
+    backgroundOpacity: block.props.label?.backgroundOpacity ?? 1,
+    paddingXmm: block.props.label?.paddingXmm ?? 1,
+    paddingYmm: block.props.label?.paddingYmm ?? 0.25,
+    marginMm: block.props.label?.marginMm ?? 1,
   };
 
   return section("Etiqueta", [
@@ -41,6 +47,33 @@ export function renderLabeledSection({ block, controller }) {
       max: 32,
       step: 1,
       onChange: (value) => updateLabeledStyle(controller, { fontSizePt: value }),
+    })),
+    field("Fondo etiqueta", colorOpacityControl({
+      color: label.backgroundColor,
+      opacity: label.backgroundOpacity,
+      onColorChange: (value) => updateLabeledStyle(controller, { backgroundColor: value }),
+      onOpacityChange: (value) => updateLabeledStyle(controller, { backgroundOpacity: value }),
+    }), { className: "property-field--color" }),
+    field("Padding X", numberControl({
+      value: label.paddingXmm,
+      min: 0,
+      max: 10,
+      step: 0.25,
+      onChange: (value) => updateLabeledStyle(controller, { paddingXmm: value }),
+    })),
+    field("Padding Y", numberControl({
+      value: label.paddingYmm,
+      min: 0,
+      max: 10,
+      step: 0.25,
+      onChange: (value) => updateLabeledStyle(controller, { paddingYmm: value }),
+    })),
+    field("Margen", numberControl({
+      value: label.marginMm,
+      min: 0,
+      max: 20,
+      step: 0.25,
+      onChange: (value) => updateLabeledStyle(controller, { marginMm: value }),
     })),
   ]);
 }
