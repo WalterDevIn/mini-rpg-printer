@@ -2,6 +2,7 @@ import { BLOCK_TYPES } from "../blocks/blockTypes.js";
 import { renderGridBlock } from "./renderGridBlock.js";
 import { renderIconBlock } from "./renderIconBlock.js";
 import { renderImageBlock } from "./renderImageBlock.js";
+import { renderLabeledBlock } from "./renderLabeledBlock.js";
 import { renderLineBlock } from "./renderLineBlock.js";
 import { renderRuledTextBlock } from "./renderRuledTextBlock.js";
 import { renderTextBlock } from "./renderTextBlock.js";
@@ -13,6 +14,7 @@ const BLOCK_RENDERERS = {
   [BLOCK_TYPES.gridBlock]: renderGridBlock,
   [BLOCK_TYPES.image]: renderImageBlock,
   [BLOCK_TYPES.icon]: renderIconBlock,
+  [BLOCK_TYPES.labeled]: renderLabeledBlock,
 };
 
 export function getBlockRenderer(type) {
