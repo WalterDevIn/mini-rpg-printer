@@ -37,12 +37,18 @@ export function textControl({ value, placeholder = "", onChange }) {
     },
     on: {
       keydown: stopEditorShortcut,
+      input: (event) => onChange(event.target.value),
       change: (event) => onChange(event.target.value),
     },
   });
 }
 
 export function numberControl({ value, min, max, step = 1, onChange }) {
+  function commitValue(event) {
+    const nextValue = Number(event.target.value);
+    if (Number.isFinite(nextValue)) onChange(nextValue);
+  }
+
   return el("input", {
     className: "property-control",
     type: "number",
@@ -54,7 +60,8 @@ export function numberControl({ value, min, max, step = 1, onChange }) {
     },
     on: {
       keydown: stopEditorShortcut,
-      change: (event) => onChange(Number(event.target.value)),
+      input: commitValue,
+      change: commitValue,
     },
   });
 }
