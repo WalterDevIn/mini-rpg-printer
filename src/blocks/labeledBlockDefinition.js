@@ -27,6 +27,11 @@ export const LABELED_BLOCK_DEFAULT_PROPS = {
     text: "Etiqueta",
     position: "fieldsetTopLeft",
     fontSizePt: 8,
+    backgroundColor: "#ffffff",
+    backgroundOpacity: 1,
+    paddingXmm: 1,
+    paddingYmm: 0.25,
+    marginMm: 1,
   },
 };
 
