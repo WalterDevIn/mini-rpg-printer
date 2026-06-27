@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-**Paso actual:** 5 — Completado. Próximo paso recomendado: 6 — Partir `blockDragSession.js` en intent, preview y commit.
+**Paso actual:** 6 — Completado. Próximo paso recomendado: 7 — Sacar handlers de página de `renderCanvas.js`.
 
 **Regla de trabajo:** no avanzar al siguiente paso sin actualizar este archivo. Cada refactor debe mantener el estado actual, los archivos tocados y una nota breve de verificación.
 
@@ -163,22 +163,30 @@ src/view/renderBlock.js
 
 ### Paso 6 — Partir `blockDragSession.js` en intent, preview y commit
 
-**Estado:** pendiente.
+**Estado:** completado.
 
-**Motivo:** la sesión de drag mezcla pointer events, click vs drag, edición de texto, selección múltiple, ghost visual, preview grupal y commit final.
+**Motivo:** la sesión de drag mezclaba pointer events, click vs drag, edición de texto, selección múltiple, ghost visual, preview grupal y commit final.
 
-**Idea objetivo:**
+**Resultado:** `blockDragSession.js` quedó como coordinador del ciclo `pointerdown/move/up`. Las reglas de intención, preview visual, gesto de edición textual y commit de drop fueron extraídas a módulos específicos.
+
+**Archivos creados:**
 
 ```text
-src/editor/interaction/
-  blockDragSession.js
-  dragIntent.js
-  blockDragPreview.js
-  dropCommit.js
-  textEditGesture.js
+src/editor/interaction/dragIntent.js
+src/editor/interaction/blockDragPreview.js
+src/editor/interaction/dropCommit.js
+src/editor/interaction/textEditGesture.js
 ```
 
-**Criterio de finalización:** `blockDragSession.js` conserva el ciclo de eventos, pero delega reglas y efectos visuales.
+**Archivos modificados:**
+
+```text
+src/editor/interaction/blockDragSession.js
+```
+
+**Criterio de finalización:** cumplido. `blockDragSession.js` conserva el ciclo de eventos, pero delega reglas y efectos visuales.
+
+**Verificación sugerida:** probar click para seleccionar, segundo click para editar texto, hold/drag, drag de selección múltiple, drop animation y movimiento entre páginas.
 
 ---
 
@@ -271,4 +279,5 @@ src/
 - Paso 4 completado por pedido explícito: se movieron constraints de bloque a `src/blocks/blockConstraints.js`.
 - Paso 3 completado después del Paso 4: `editorController.js` quedó compuesto por acciones bajo `src/editor/actions/`.
 - Paso 5 completado: `blockRegistry.js` centraliza capabilities/constraints y la toolbar/render reducen hardcodeos por tipo.
-- Próximo paso recomendado: Paso 6 — partir `blockDragSession.js` en intent, preview y commit.
+- Paso 6 completado: `blockDragSession.js` quedó como coordinador y delega intent/preview/drop/text edit.
+- Próximo paso recomendado: Paso 7 — sacar handlers de página de `renderCanvas.js`.
