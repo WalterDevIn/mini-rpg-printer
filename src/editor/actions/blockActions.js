@@ -139,6 +139,14 @@ export function createBlockActions({ editorState, render, mutateDocument }) {
       render();
     },
 
+    updateBlockFrameAndProps(blockId, frame, props, { shouldRender = true } = {}) {
+      mutateDocument((documentModel) => {
+        updateDocumentBlockFrame(documentModel, blockId, frame);
+        updateDocumentBlockProps(documentModel, blockId, props);
+      });
+      if (shouldRender) render();
+    },
+
     updateSelectedBlockProps(props) {
       const blockIds = getSelectedBlockIds(editorState);
       if (blockIds.length === 0) return;
