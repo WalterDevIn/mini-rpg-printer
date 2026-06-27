@@ -12,6 +12,10 @@ export function renderAppearanceSection({ block, editorState, controller }) {
   const style = getCommonStyle(block);
 
   return section("Apariencia", [
+    field("Snap 2.5mm", checkboxControl({
+      checked: style.useFineSnap,
+      onChange: (value) => updateCommonStyle(controller, { useFineSnap: value }),
+    })),
     field("Fondo", colorReferenceControl({
       label: "Fondo",
       globalColors: editorState.globalColors,
@@ -46,13 +50,21 @@ export function renderAppearanceSection({ block, editorState, controller }) {
       checked: style.hasBorder,
       onChange: (value) => updateCommonStyle(controller, { hasBorder: value }),
     })),
-    field("Radio", numberControl({
+    field("Radio general", numberControl({
       value: style.borderRadiusMm,
       min: 0,
       max: 20,
       step: 0.5,
       onChange: (value) => updateCommonStyle(controller, { borderRadiusMm: value }),
     })),
+    renderSideNumberField("Borde sup.", style.borderTopWidthMm, "borderTopWidthMm", controller),
+    renderSideNumberField("Borde der.", style.borderRightWidthMm, "borderRightWidthMm", controller),
+    renderSideNumberField("Borde inf.", style.borderBottomWidthMm, "borderBottomWidthMm", controller),
+    renderSideNumberField("Borde izq.", style.borderLeftWidthMm, "borderLeftWidthMm", controller),
+    renderSideNumberField("Radio sup. izq.", style.borderTopLeftRadiusMm ?? style.borderRadiusMm, "borderTopLeftRadiusMm", controller),
+    renderSideNumberField("Radio sup. der.", style.borderTopRightRadiusMm ?? style.borderRadiusMm, "borderTopRightRadiusMm", controller),
+    renderSideNumberField("Radio inf. der.", style.borderBottomRightRadiusMm ?? style.borderRadiusMm, "borderBottomRightRadiusMm", controller),
+    renderSideNumberField("Radio inf. izq.", style.borderBottomLeftRadiusMm ?? style.borderRadiusMm, "borderBottomLeftRadiusMm", controller),
     field("Layer", numberControl({
       value: style.layer,
       min: 0,
@@ -61,4 +73,14 @@ export function renderAppearanceSection({ block, editorState, controller }) {
       onChange: (value) => updateCommonStyle(controller, { layer: value }),
     })),
   ]);
+}
+
+function renderSideNumberField(label, value, key, controller) {
+  return field(label, numberControl({
+    value,
+    min: 0,
+    max: 20,
+    step: 0.25,
+    onChange: (nextValue) => updateCommonStyle(controller, { [key]: nextValue }),
+  }));
 }
