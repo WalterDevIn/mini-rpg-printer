@@ -5,4 +5,5 @@ export const BLOCK_TYPES = {
   gridBlock: "gridBlock",
   image: "image",
   icon: "icon",
+  labeled: "labeled",
 };
