@@ -51,7 +51,7 @@ function createLineSvg({ block, lineStyle, color }) {
         stroke: "transparent",
         "stroke-width": String(Math.max(lineStyle.thicknessMm + 4, 4)),
         "stroke-linecap": "round",
-        vectorEffect: "non-scaling-stroke",
+        "vector-effect": "non-scaling-stroke",
       },
     }),
     el("line", {
@@ -64,7 +64,7 @@ function createLineSvg({ block, lineStyle, color }) {
         stroke: color,
         "stroke-width": String(lineStyle.thicknessMm),
         "stroke-linecap": "round",
-        vectorEffect: "non-scaling-stroke",
+        "vector-effect": "non-scaling-stroke",
       },
     }),
   ]);
