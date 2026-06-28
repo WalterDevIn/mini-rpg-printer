@@ -10,7 +10,7 @@ export function renderLineBlock({ block, page, pageElement, editorState, control
   const resolvedCommonCss = commonStyleToCss(commonStyle, editorState.globalColors);
   const lineStyle = getLineStyle(block);
   const isSelected = isSelectedBlock(editorState, block.id);
-  const svg = createLineSvg({ lineStyle, color: resolvedCommonCss.color });
+  const svg = createLineSvg({ block, lineStyle, color: resolvedCommonCss.color });
 
   return createBlockElement({
     block,
@@ -33,14 +33,27 @@ export function renderLineBlock({ block, page, pageElement, editorState, control
   });
 }
 
-function createLineSvg({ lineStyle, color }) {
+function createLineSvg({ block, lineStyle, color }) {
   return el("svg", {
     className: "line-block__svg",
     attrs: {
-      viewBox: `0 0 ${Math.max(lineStyle.start.x, lineStyle.end.x, 1)} ${Math.max(lineStyle.start.y, lineStyle.end.y, 1)}`,
+      viewBox: `0 0 ${block.frame.width} ${block.frame.height}`,
       preserveAspectRatio: "none",
     },
   }, [
+    el("line", {
+      className: "line-block__segment line-block__hit-area",
+      attrs: {
+        x1: String(lineStyle.start.x),
+        y1: String(lineStyle.start.y),
+        x2: String(lineStyle.end.x),
+        y2: String(lineStyle.end.y),
+        stroke: "transparent",
+        "stroke-width": String(Math.max(lineStyle.thicknessMm + 4, 4)),
+        "stroke-linecap": "round",
+        vectorEffect: "non-scaling-stroke",
+      },
+    }),
     el("line", {
       className: "line-block__segment",
       attrs: {
