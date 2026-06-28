@@ -1,7 +1,12 @@
-export function el(tagName, options = {}, children = []) {
-  const element = document.createElement(tagName);
+const SVG_TAGS = new Set(["svg", "line", "path", "circle", "rect", "g", "text", "polyline", "polygon"]);
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-  if (options.className) element.className = options.className;
+export function el(tagName, options = {}, children = []) {
+  const element = SVG_TAGS.has(tagName)
+    ? document.createElementNS(SVG_NAMESPACE, tagName)
+    : document.createElement(tagName);
+
+  if (options.className) element.setAttribute("class", options.className);
   if (options.textContent !== undefined) element.textContent = options.textContent;
   if (options.innerHTML !== undefined) element.innerHTML = options.innerHTML;
   if (options.title) element.title = options.title;
