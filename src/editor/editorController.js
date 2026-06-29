@@ -5,6 +5,7 @@ import { createGlobalColorActions } from "./actions/globalColorActions.js";
 import { createMenuActions } from "./actions/menuActions.js";
 import { createPageActions } from "./actions/pageActions.js";
 import { createSelectionActions } from "./actions/selectionActions.js";
+import { createSidebarActions } from "./actions/sidebarActions.js";
 
 export function createEditorController({ editorState, render }) {
   function mutateDocument(mutation) {
@@ -30,6 +31,7 @@ export function createEditorController({ editorState, render }) {
     commitTextEdit: blockActions.commitTextEdit,
   });
   const globalColorActions = createGlobalColorActions({ editorState, render });
+  const sidebarActions = createSidebarActions({ editorState, render });
 
   return {
     ...blockActions,
@@ -38,5 +40,6 @@ export function createEditorController({ editorState, render }) {
     ...pageActions,
     ...menuActions,
     ...globalColorActions,
+    ...sidebarActions,
   };
 }
