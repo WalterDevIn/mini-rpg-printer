@@ -32,6 +32,10 @@ export function createEditorState() {
       contextMenu: null,
       marquee: null,
     },
+    ui: {
+      sidebarCollapsed: false,
+      collapsedPageIds: [],
+    },
     activeTool: "select",
   };
 }
