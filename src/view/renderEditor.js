@@ -3,6 +3,7 @@ import { renderBlockDock } from "./renderBlockDock.js";
 import { renderCanvas } from "./renderCanvas.js";
 import { renderContextMenu } from "./renderContextMenu.js";
 import { renderPageTreeSidebar } from "./renderPageTreeSidebar.js";
+import { renderPrintPreview } from "./renderPrintPreview.js";
 import { renderToolbar } from "./renderToolbar.js";
 
 export function renderEditor({ editorState, controller }) {
@@ -14,6 +15,7 @@ export function renderEditor({ editorState, controller }) {
     ]),
     renderBlockDock({ editorState, controller }),
     renderContextMenu({ editorState, controller }),
+    renderPrintPreview({ editorState, controller }),
   ]);
 }
 
