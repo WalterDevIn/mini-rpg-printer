@@ -75,6 +75,8 @@ function renderPage({ page, pageNumber, pageSide, editorState, controller }) {
   const handlers = createPagePointerHandlers({ page, pageElement, editorState, controller });
 
   pageElement.addEventListener("pointerdown", handlers.pointerdown);
+  pageElement.addEventListener("pointermove", handlers.pointermove);
+  pageElement.addEventListener("pointerleave", handlers.pointerleave);
   pageElement.addEventListener("contextmenu", handlers.contextmenu);
 
   if (editorState.viewport.showPageMargin) {
