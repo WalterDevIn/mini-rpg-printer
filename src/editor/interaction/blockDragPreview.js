@@ -12,6 +12,7 @@ export function createBlockDragPreview({
 }) {
   let ghost = null;
   let groupPreview = null;
+  const isGroupDrag = activeSelectionIds.length > 1;
 
   return {
     begin(event, targetPageId) {
@@ -22,30 +23,50 @@ export function createBlockDragPreview({
       editorState.interaction.droppingBlockId = null;
       editorState.interaction.contextMenu = null;
 
+      if (isGroupDrag) {
+        groupPreview = createGroupDragPreview({
+          pageElement,
+          blockIds: activeSelectionIds,
+          event,
+        });
+        return;
+      }
+
       blockElement.classList.add("is-drag-source");
       ghost = createDragGhost(blockElement, event, pointerOffsetPx);
-      groupPreview = createGroupDragPreview({
-        pageElement,
-        blockIds: activeSelectionIds,
-        sourceBlockId: block.id,
-      });
     },
 
     move(event, delta) {
+      if (isGroupDrag) {
+        groupPreview?.move(event, delta);
+        return;
+      }
+
       moveDragGhost(ghost, event, pointerOffsetPx);
-      groupPreview?.move(delta);
     },
 
     clearSource() {
+      if (isGroupDrag) return;
       blockElement.classList.remove("is-drag-source");
     },
 
     clearGroup() {
-      groupPreview?.clear();
+      groupPreview?.restoreSources();
     },
 
     dropGhost() {
+      if (isGroupDrag) {
+        groupPreview?.dropGhost();
+        return;
+      }
+
       dropDragGhost(ghost);
+    },
+
+    removeGhost() {
+      if (isGroupDrag) {
+        groupPreview?.removeGhost();
+      }
     },
   };
 }
