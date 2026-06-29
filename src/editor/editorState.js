@@ -35,6 +35,7 @@ export function createEditorState() {
     ui: {
       sidebarCollapsed: false,
       collapsedPageIds: [],
+      printPreviewOpen: false,
     },
     activeTool: "select",
   };
