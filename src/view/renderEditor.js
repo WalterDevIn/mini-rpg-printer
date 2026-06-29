@@ -1,4 +1,5 @@
 import { el } from "../shared/dom.js";
+import { renderBlockDock } from "./renderBlockDock.js";
 import { renderCanvas } from "./renderCanvas.js";
 import { renderContextMenu } from "./renderContextMenu.js";
 import { renderToolbar } from "./renderToolbar.js";
@@ -7,6 +8,7 @@ export function renderEditor({ editorState, controller }) {
   return el("div", { className: "app-shell" }, [
     renderToolbar({ editorState, controller }),
     renderCanvas({ editorState, controller }),
+    renderBlockDock({ editorState, controller }),
     renderContextMenu({ editorState, controller }),
   ]);
 }
