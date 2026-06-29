@@ -4,6 +4,7 @@ import { createClipboardActions } from "./actions/clipboardActions.js";
 import { createGlobalColorActions } from "./actions/globalColorActions.js";
 import { createMenuActions } from "./actions/menuActions.js";
 import { createPageActions } from "./actions/pageActions.js";
+import { createPrintPreviewActions } from "./actions/printPreviewActions.js";
 import { createSelectionActions } from "./actions/selectionActions.js";
 import { createSidebarActions } from "./actions/sidebarActions.js";
 
@@ -32,6 +33,7 @@ export function createEditorController({ editorState, render }) {
   });
   const globalColorActions = createGlobalColorActions({ editorState, render });
   const sidebarActions = createSidebarActions({ editorState, render });
+  const printPreviewActions = createPrintPreviewActions({ editorState, render });
 
   return {
     ...blockActions,
@@ -41,5 +43,6 @@ export function createEditorController({ editorState, render }) {
     ...menuActions,
     ...globalColorActions,
     ...sidebarActions,
+    ...printPreviewActions,
   };
 }
