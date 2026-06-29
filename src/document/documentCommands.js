@@ -57,6 +57,7 @@ export function addBlockToPage(documentModel, pageId, type, overrides = {}) {
   }
 
   const block = createBlock(type, overrides);
+  block.frame = constrainFrameToPage(block.frame, documentModel.pageSpec, getMinimumFrameSize(block));
   page.blocks.push(block);
   return block;
 }
