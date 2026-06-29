@@ -61,8 +61,9 @@ function renderSpreadControls({ spread, spreadIndex, controller }) {
 
 function renderPage({ page, pageNumber, pageSide, editorState, controller }) {
   const pageSpec = editorState.document.pageSpec;
+  const isPlacingBlock = editorState.activeTool && editorState.activeTool !== "select";
   const pageElement = el("section", {
-    className: `page page--${pageSide}${editorState.viewport.showGrid ? " is-grid-visible" : ""}`,
+    className: `page page--${pageSide}${editorState.viewport.showGrid ? " is-grid-visible" : ""}${isPlacingBlock ? " is-placing-block" : ""}`,
     dataset: { pageId: page.id },
     style: {
       width: `${pageSpec.widthMm}mm`,
