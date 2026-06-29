@@ -50,11 +50,11 @@ function renderPageItem({ item, editorState, controller }) {
       el("span", { className: "page-tree__page-side", textContent: item.sideLabel }),
       el("span", { className: "page-tree__page-count", textContent: `${blockCount}` }),
     ]),
-    isCollapsed ? null : renderPageBlocks({ item, editorState }),
+    isCollapsed ? null : renderPageBlocks({ item, editorState, controller }),
   ]);
 }
 
-function renderPageBlocks({ item, editorState }) {
+function renderPageBlocks({ item, editorState, controller }) {
   if (item.page.blocks.length === 0) {
     return el("div", { className: "page-tree__children page-tree__children--empty", textContent: "Sin elementos" });
   }
@@ -62,15 +62,20 @@ function renderPageBlocks({ item, editorState }) {
   return el("div", { className: "page-tree__children" }, item.page.blocks.map((block, index) => renderBlockItem({
     block,
     index,
+    pageId: item.page.id,
     editorState,
+    controller,
   })));
 }
 
-function renderBlockItem({ block, index, editorState }) {
+function renderBlockItem({ block, index, pageId, editorState, controller }) {
   return el("button", {
     className: `page-tree__block-button${isSelectedBlock(editorState, block.id) ? " is-selected" : ""}`,
     type: "button",
     title: getBlockDisplayName(block),
+    on: {
+      click: () => controller.selectBlock(block.id, pageId),
+    },
   }, [
     el("i", { className: getBlockIconClass(block), attrs: { "aria-hidden": "true" } }),
     el("span", { className: "page-tree__block-name", textContent: `${index + 1}. ${getBlockDisplayName(block)}` }),
