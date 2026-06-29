@@ -21,6 +21,116 @@ body {
   flex-shrink: 0;
 }
 
+.editor-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.page-tree-sidebar {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid rgba(148, 163, 184, 0.36);
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.page-tree-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 42px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.92);
+}
+
+.page-tree-sidebar__title {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.page-tree-sidebar__count {
+  min-width: 22px;
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #475569;
+  background: #e2e8f0;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.page-tree {
+  height: calc(100% - 42px);
+  overflow: auto;
+  padding: 8px;
+  overscroll-behavior: contain;
+}
+
+.page-tree__root {
+  display: grid;
+  gap: 3px;
+}
+
+.page-tree__item {
+  display: grid;
+  gap: 2px;
+}
+
+.page-tree__page-button {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 30px;
+  border: 0;
+  border-radius: 9px;
+  padding: 5px 7px;
+  color: #334155;
+  background: transparent;
+  text-align: left;
+}
+
+.page-tree__page-button:hover {
+  background: #eef2ff;
+}
+
+.page-tree__page-button i {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.page-tree__page-name {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-tree__page-side {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.page-tree__children {
+  margin-left: 25px;
+  padding: 1px 0 5px 8px;
+  border-left: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
 .editor-viewport {
   min-width: 0;
   min-height: 0;
