@@ -1,5 +1,6 @@
 import { el, iconButton } from "../shared/dom.js";
 import { renderBlock } from "./renderBlock.js";
+import { renderRingMargin } from "./renderRingMargin.js";
 
 const A4_SPEC = {
   widthMm: 210,
@@ -73,6 +74,8 @@ function renderPrintSlot({ slot, editorState, controller }) {
   const previewState = createPreviewEditorState(editorState);
   const previewController = createPreviewController(controller);
 
+  pageElement.appendChild(renderRingMargin({ pageSide: slot.pageSide }));
+
   slot.page.blocks.forEach((block) => {
     pageElement.appendChild(renderBlock({
       block,
@@ -140,11 +143,17 @@ function createSlot(slotIndex, pageEntry) {
   return {
     page: pageEntry?.page ?? null,
     pageNumber: pageEntry?.pageNumber ?? null,
+    pageSide: getPageSideFromNumber(pageEntry?.pageNumber),
     x: 0,
     y: row * pageHeight,
     width: pageWidth,
     height: pageHeight,
   };
+}
+
+function getPageSideFromNumber(pageNumber) {
+  if (!pageNumber) return "left";
+  return pageNumber % 2 === 0 ? "left" : "right";
 }
 
 function createPreviewEditorState(editorState) {
